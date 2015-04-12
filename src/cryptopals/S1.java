@@ -134,19 +134,6 @@ public class S1 {
 
 	}
 
-	public static int firstNonEqualByte(byte[] a, byte[] b) {
-		return firstNonEqualByte(a, 0, b, 0, Math.min(a.length, b.length));
-	}
-
-	public static int firstNonEqualByte(byte[] a, int aOffset, byte[] b,
-			int bOffset, int length) {
-		for (int i = 0; i < length; i++) {
-			if (a[aOffset + i] != b[bOffset + i])
-				return i;
-		}
-		return -1;
-	}
-
 	// returns [padding needed to reach boundary, index of block]
 	public static int[] detectBlockBoundary(WebServer server, int blockSize)
 			throws Exception {
@@ -154,26 +141,18 @@ public class S1 {
 		byte[] a = server.encrypt(marker);
 		marker[0] = (byte) (marker[0] ^ 0xFF);
 		byte[] b = server.encrypt(marker);
-		int index = firstNonEqualByte(a, b);
+		int index = ArrayUtils.firstNonEqualByte(a, b);
 		marker[0] = (byte) (marker[0] ^ 0xFF);
 		for (int i = 1; i < blockSize; i++) {
 			marker[i] = (byte) (marker[i] ^ 0xFF);
 			b = server.encrypt(marker);
-			int x = firstNonEqualByte(a, b);
+			int x = ArrayUtils.firstNonEqualByte(a, b);
 			if (index != x)
 				return new int[] { i, x };
 			marker[i] = (byte) (marker[i] ^ 0xFF);
 		}
 		return new int[] { 0, index };
 
-	}
-
-	public int indexOf(byte[] a, byte[] b) {
-		for (int i = 0; i < a.length; i++) {
-			if (equals(a, i, b, 0, b.length))
-				return i;
-		}
-		return -1;
 	}
 
 	public byte[] injectBitflippingCBC(WebServer s, byte[] payload,
@@ -203,7 +182,7 @@ public class S1 {
 				byte[] injCipher = Arrays.copyOf(enc, enc.length);
 				byte[] cipher = new byte[blockSize];
 				int inOffset = blockRes[1];
-				outOffset = indexOf(s.decrypt(enc), plainbytes) + padding
+				outOffset = ArrayUtils.indexOf(s.decrypt(enc), plainbytes) + padding
 						+ blockSize;
 				for (int i = 0; i < blockSize; i++) {
 					for (int j = Byte.MIN_VALUE; j <= Byte.MAX_VALUE; j++) {
@@ -289,13 +268,6 @@ public class S1 {
 		return -1;
 	}
 
-	public static int containsBlock(byte[] data, byte[] block, int blockSize) {
-		for (int i = 0; i < data.length; i += blockSize) {
-			if (equals(data, i, block, 0, blockSize))
-				return i;
-		}
-		return -1;
-	}
 
 	public static byte[] attackGeneralECB(WebServer server) throws Exception {
 		int blockSize = detectECBBlockSize(server);
@@ -338,11 +310,11 @@ public class S1 {
 				int index = -1;
 				while (index == -1) {
 					ciphertxt = server.encrypt(test[j]);
-					index = containsBlock(ciphertxt, marker, blockSize);
+					index = ArrayUtils.containsBlock(ciphertxt, marker, blockSize);
 				}
 				for (int k = Byte.MIN_VALUE; k <= Byte.MAX_VALUE; k++) {
 					int kIndex = (k - Byte.MIN_VALUE + 1) * blockSize;
-					if (equals(ciphertxt, index + kIndex, ciphertxt, index
+					if (ArrayUtils.equals(ciphertxt, index + kIndex, ciphertxt, index
 							+ (i + C256 + 1) * blockSize, blockSize)) {
 						decrypted[i * blockSize + j] = (byte) k;
 						print(decrypted);
@@ -448,13 +420,6 @@ public class S1 {
 
 	}
 
-	public static boolean equals(byte[] a, int aOffset, byte[] b, int bOffset,
-			int length) {
-		for (int i = 0; i < length; i++)
-			if (a[aOffset + i] != b[bOffset + i])
-				return false;
-		return true;
-	}
 
 	public static byte[] plaintextAttackECB(WebServer server) throws Exception {
 		int blockSize = detectECBBlockSize(server);
@@ -479,7 +444,7 @@ public class S1 {
 				for (int k = Byte.MIN_VALUE; k <= Byte.MAX_VALUE; k++) {
 					guess[(i + 1) * blockSize - 1] = (byte) k;
 					byte[] res = server.encrypt(guess);
-					if (equals(res, i * blockSize, ciphertxt, i * blockSize,
+					if (ArrayUtils.equals(res, i * blockSize, ciphertxt, i * blockSize,
 							blockSize)) {
 						decrypted[j + i * blockSize] = (byte) k;
 						break;
@@ -952,14 +917,4 @@ public class S1 {
 
 	}
 
-}
-
-interface TestAttack {
-	boolean test(WebServer s, byte[] injection) throws Exception;
-}
-
-interface WebServer {
-	byte[] encrypt(byte[] data) throws Exception;
-
-	byte[] decrypt(byte[] data) throws Exception;
 }
