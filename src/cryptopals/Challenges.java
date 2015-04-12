@@ -4,6 +4,7 @@ import static cryptopals.Encryption.*;
 import static cryptopals.Analysis.*;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -156,6 +157,101 @@ public class Challenges {
 		System.arraycopy(inj, 16, enc, 32, 16);
 
 		System.out.println(isEncryptedProfileAdmin(enc));
+	}
+
+	public void C1() {
+		String hex = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
+		String out = "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t";
+		String b64 = DatatypeConverter.printBase64Binary(DatatypeConverter
+				.parseHexBinary(hex));
+		System.out.println(b64);
+		System.out.println(out);
+	}
+
+	public void C2() {
+
+		String p1 = "1c0111001f010100061a024b53535009181c";
+		String p2 = "686974207468652062756c6c277320657965";
+		String out = "746865206b696420646f6e277420706c6179";
+		byte[] b1 = DatatypeConverter.parseHexBinary(p1);
+		byte[] b2 = DatatypeConverter.parseHexBinary(p2);
+		byte[] b3 = new byte[b1.length];
+		for (int i = 0; i < b1.length; i++)
+			b3[i] = (byte) (b1[i] ^ b2[i]);
+		System.out.println(DatatypeConverter.printHexBinary(b3));
+		System.out.println(out);
+	}
+	
+	public void C3(){
+
+		byte[] b1 = DatatypeConverter.parseHexBinary("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736");
+		Map<Character, Double> freq = frequencyEnglish();
+		byte maxByte = 0;
+		double max = 0;
+		String maxString = "";
+		byte[] b3 = new byte[b1.length];
+		for(byte b2 = 0; b2 >= 0; b2++){
+			double score = 0;
+			for(int i=0; i<b1.length; i++)
+				b3[i] =  (byte) (b1[i]^b2);
+			String x = new String(b3);
+			for(int i=0;i<x.length();i++){
+				Double s = freq.get(x.charAt(i));
+				if(s != null)
+					score += s;
+			}
+			if(score > max){
+				max = score;
+				maxByte = b2;
+				maxString = x;
+			}
+		}
+		for(int i=0; i<b1.length; i++)
+			b3[i] =  (byte) (b1[i]^maxByte);
+
+		System.out.println("~~~~~~~~~~~~");
+		System.out.println(maxString);
+		System.out.println(DatatypeConverter.printHexBinary(b3));
+		System.out.println(maxByte);	
+		
+	}
+	
+	public void C4() throws Exception{
+		BufferedReader br = new BufferedReader(new FileReader("4.txt"));
+		
+		Map<Character, Double> freq = frequencyEnglish();
+		byte maxByte = 0;
+		double max = 0;
+		String maxString = "";
+		while(true){
+			String line = br.readLine();
+			if(line == null)
+				break;
+			byte[] b1 = DatatypeConverter.parseHexBinary(line); 
+			byte[] b3 = new byte[b1.length];
+			for(byte b2 = 0; b2 >= 0; b2++){
+				double score = 0;
+				for(int i=0; i<b1.length; i++)
+					b3[i] =  (byte) (b1[i]^b2);
+				String x = new String(b3);
+				for(int i=0;i<x.length();i++){
+					Double s = freq.get(x.charAt(i));
+					if(s != null)
+						score += s;
+				}
+				if(score > max){
+					max = score;
+					maxByte = b2;
+					maxString = x;
+				}
+			}
+		}
+
+		System.out.println("~~~~~~~~~~~~");
+		System.out.println(maxString);
+		System.out.println(maxByte);
+		br.close();
+		
 	}
 
 	public static void C5() {
