@@ -14,6 +14,7 @@ import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -109,7 +110,10 @@ public class Challenges {
 
 		@Override
 		public byte[] decrypt(byte[] data) throws Exception {
-			data = decryptCBC(data, randomKey, randomIV);
+			int blockSize = 16;
+			byte[] iv = Arrays.copyOfRange(data, 0,blockSize);
+			byte[] ciphertxt = Arrays.copyOfRange(data,blockSize,data.length);
+			data = decryptCBC(ciphertxt, randomKey, iv);
 			data = unpad(data);
 			throw new GeneralSecurityException();
 		}
@@ -127,13 +131,14 @@ public class Challenges {
 					"MDAwMDA4b2xsaW4nIGluIG15IGZpdmUgcG9pbnQgb2g=",
 					"MDAwMDA5aXRoIG15IHJhZy10b3AgZG93biBzbyBteSBoYWlyIGNhbiBibG93" };
 			int index = random.nextInt(strs.length);
-			index = 0;
 			return encrypt(DatatypeConverter.parseBase64Binary(strs[index]));
 		}
 
+		// prepends IV to ciphertxt
 		@Override
 		public byte[] encrypt(byte[] data) throws Exception {
-			return encryptCBC(data, randomKey, randomIV);
+			return ArrayUtils.concat(randomIV,
+					encryptCBC(data, randomKey, randomIV));
 		}
 	}
 
@@ -378,7 +383,11 @@ public class Challenges {
 
 	public void C17() throws Exception {
 		C17Server s = new C17Server();
-		print(attackCBCPaddingOracle(s));
+		HashSet<String> set = new HashSet<String>();
+		for(int i=0; i<10;i++)
+			if(set.add(new String(attackCBCPaddingOracle(s))))
+				i=0;
+		print(set.toString());
 
 	}
 

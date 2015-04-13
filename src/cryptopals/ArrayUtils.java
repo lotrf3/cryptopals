@@ -1,6 +1,19 @@
 package cryptopals;
 
 public class ArrayUtils {
+
+	
+	public static byte[] concat(byte[] a, byte[] b) {
+		return concat(a, 0, a.length, b, 0, b.length);
+	}
+	public static byte[] concat(byte[] a, int aOffset, int aLength, byte[] b,
+			int bOffset, int bLength) {
+		byte[] res = new byte[aLength + bLength];
+		System.arraycopy(a, aOffset, res, 0, aLength);
+		System.arraycopy(b, bOffset, res, aLength, bLength);
+		return res;
+	}
+
 	public static int containsBlock(byte[] data, byte[] block, int blockSize) {
 		for (int i = 0; i < data.length; i += blockSize) {
 			if (equals(data, i, block, 0, blockSize))
@@ -20,6 +33,7 @@ public class ArrayUtils {
 	public static int firstNonEqualByte(byte[] a, byte[] b) {
 		return firstNonEqualByte(a, 0, b, 0, Math.min(a.length, b.length));
 	}
+
 	public static int firstNonEqualByte(byte[] a, int aOffset, byte[] b,
 			int bOffset, int length) {
 		for (int i = 0; i < length; i++) {

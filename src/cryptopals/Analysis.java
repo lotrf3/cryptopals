@@ -1,8 +1,6 @@
 package cryptopals;
 
-import static cryptopals.Analysis.detectBlockPattern;
-import static cryptopals.Analysis.detectECBBlockSize;
-
+import static cryptopals.Challenges.print;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -57,35 +55,39 @@ public class Analysis {
 	}
 
 	public static byte[] attackCBCPaddingOracle(C17Server s) throws Exception {
-		byte[] ciphertxt = s.encrypt();
+		int blockSize = 16;
+		byte[] ciphertxtWithIV = s.encrypt();
+		byte[] ciphertxt = Arrays.copyOfRange(ciphertxtWithIV, blockSize,
+				ciphertxtWithIV.length);
+		byte[] iv = Arrays.copyOfRange(ciphertxtWithIV, 0, blockSize);
 		byte[] decrypted = new byte[ciphertxt.length];
 		byte[] intermediate = new byte[ciphertxt.length];
-		int blockSize = 16;
-		for (int i = blockSize; i < ciphertxt.length; i += blockSize) {
-			byte[] guess = new byte[i + blockSize];
+		for (int i = 0; i < ciphertxt.length; i += blockSize) {
+			byte[] guess = new byte[i + blockSize * 2];
 			for (int j = 0; j < blockSize; j++) {
 				int padding = j + 1;
 				for (int k = Byte.MIN_VALUE; k <= Byte.MAX_VALUE; k++) {
 					try {
-						System.arraycopy(ciphertxt, i, guess, i, blockSize);
-						guess[i - j - 1] = (byte) k;
+						System.arraycopy(ciphertxt, i, guess, blockSize + i,
+								blockSize);
+						guess[blockSize + i - j - 1] = (byte) k;
 						for (int l = j - 1; l >= 0; l--) {
-							guess[i - l - 1] = (byte) (intermediate[i
+							guess[blockSize + i - l - 1] = (byte) (intermediate[i
 									+ blockSize - l - 1] ^ padding);
 						}
 						s.decrypt(guess);
 					} catch (BadPaddingException bpex) {
 						// swallow padding error and retry
 					} catch (Exception ex) {
-						intermediate[i + blockSize - j - 1] = (byte) (k ^ padding + 1);
-						decrypted[i + blockSize - j - 1] = (byte) (k ^ padding ^ ciphertxt[i
-								- j - 1] + 1);
+						intermediate[i + blockSize - j - 1] = (byte) (k ^ padding);
+						decrypted[i + blockSize - j - 1] = (byte) (k ^ padding ^ ciphertxtWithIV[blockSize
+								+ i - j - 1]);
 						break;
 					}
 				}
 			}
 		}
-		return decrypted;
+		return Encryption.unpad(decrypted);
 	}
 
 	public static byte[] attackGeneralECB(WebServer server) throws Exception {

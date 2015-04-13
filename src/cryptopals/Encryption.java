@@ -1,5 +1,7 @@
 package cryptopals;
 
+import static cryptopals.Challenges.print;
+
 import java.util.Arrays;
 
 import javax.crypto.BadPaddingException;
@@ -14,7 +16,6 @@ public class Encryption {
 
 		int blockSize = iv.length;
 		byte[] res = decryptECB(data, key);
-		// print(res);
 		int ivStart = 0;
 		for (int i = 0; i < data.length; i += blockSize) {
 			// print(res);
@@ -105,7 +106,7 @@ public class Encryption {
 
 	public static byte[] unpad(byte[] data) throws BadPaddingException {
 		int padding = data[data.length - 1];
-		if (padding < 0)
+		if (padding <= 0)
 			padding += 256;
 		for (int i = 1; i < padding; i++) {
 			if (data[data.length - i - 1] != padding)
