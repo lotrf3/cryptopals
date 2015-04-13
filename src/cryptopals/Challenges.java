@@ -12,7 +12,6 @@ import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -136,13 +135,75 @@ public class Challenges {
 		// prepends IV to ciphertxt
 		@Override
 		public byte[] encrypt(byte[] data) throws Exception {
-			return Utils.concat(randomIV,
-					encryptCBC(data, randomKey, randomIV));
+			return Utils
+					.concat(randomIV, encryptCBC(data, randomKey, randomIV));
 		}
 	}
-	
 
-	public static Map<Character, Double> freq = frequencyEnglish();
+	class C19Server implements WebServer {
+		private CTR ctr = new CTR(randomKey, randomIV);
+
+		private String[] strs = {
+				"SSBoYXZlIG1ldCB0aGVtIGF0IGNsb3NlIG9mIGRheQ==",
+				"Q29taW5nIHdpdGggdml2aWQgZmFjZXM=",
+				"RnJvbSBjb3VudGVyIG9yIGRlc2sgYW1vbmcgZ3JleQ==",
+				"RWlnaHRlZW50aC1jZW50dXJ5IGhvdXNlcy4=",
+				"SSBoYXZlIHBhc3NlZCB3aXRoIGEgbm9kIG9mIHRoZSBoZWFk",
+				"T3IgcG9saXRlIG1lYW5pbmdsZXNzIHdvcmRzLA==",
+				"T3IgaGF2ZSBsaW5nZXJlZCBhd2hpbGUgYW5kIHNhaWQ=",
+				"UG9saXRlIG1lYW5pbmdsZXNzIHdvcmRzLA==",
+				"QW5kIHRob3VnaHQgYmVmb3JlIEkgaGFkIGRvbmU=",
+				"T2YgYSBtb2NraW5nIHRhbGUgb3IgYSBnaWJl",
+				"VG8gcGxlYXNlIGEgY29tcGFuaW9u",
+				"QXJvdW5kIHRoZSBmaXJlIGF0IHRoZSBjbHViLA==",
+				"QmVpbmcgY2VydGFpbiB0aGF0IHRoZXkgYW5kIEk=",
+				"QnV0IGxpdmVkIHdoZXJlIG1vdGxleSBpcyB3b3JuOg==",
+				"QWxsIGNoYW5nZWQsIGNoYW5nZWQgdXR0ZXJseTo=",
+				"QSB0ZXJyaWJsZSBiZWF1dHkgaXMgYm9ybi4=",
+				"VGhhdCB3b21hbidzIGRheXMgd2VyZSBzcGVudA==",
+				"SW4gaWdub3JhbnQgZ29vZCB3aWxsLA==",
+				"SGVyIG5pZ2h0cyBpbiBhcmd1bWVudA==",
+				"VW50aWwgaGVyIHZvaWNlIGdyZXcgc2hyaWxsLg==",
+				"V2hhdCB2b2ljZSBtb3JlIHN3ZWV0IHRoYW4gaGVycw==",
+				"V2hlbiB5b3VuZyBhbmQgYmVhdXRpZnVsLA==",
+				"U2hlIHJvZGUgdG8gaGFycmllcnM/",
+				"VGhpcyBtYW4gaGFkIGtlcHQgYSBzY2hvb2w=",
+				"QW5kIHJvZGUgb3VyIHdpbmdlZCBob3JzZS4=",
+				"VGhpcyBvdGhlciBoaXMgaGVscGVyIGFuZCBmcmllbmQ=",
+				"V2FzIGNvbWluZyBpbnRvIGhpcyBmb3JjZTs=",
+				"SGUgbWlnaHQgaGF2ZSB3b24gZmFtZSBpbiB0aGUgZW5kLA==",
+				"U28gc2Vuc2l0aXZlIGhpcyBuYXR1cmUgc2VlbWVkLA==",
+				"U28gZGFyaW5nIGFuZCBzd2VldCBoaXMgdGhvdWdodC4=",
+				"VGhpcyBvdGhlciBtYW4gSSBoYWQgZHJlYW1lZA==",
+				"QSBkcnVua2VuLCB2YWluLWdsb3Jpb3VzIGxvdXQu",
+				"SGUgaGFkIGRvbmUgbW9zdCBiaXR0ZXIgd3Jvbmc=",
+				"VG8gc29tZSB3aG8gYXJlIG5lYXIgbXkgaGVhcnQs",
+				"WWV0IEkgbnVtYmVyIGhpbSBpbiB0aGUgc29uZzs=",
+				"SGUsIHRvbywgaGFzIHJlc2lnbmVkIGhpcyBwYXJ0",
+				"SW4gdGhlIGNhc3VhbCBjb21lZHk7",
+				"SGUsIHRvbywgaGFzIGJlZW4gY2hhbmdlZCBpbiBoaXMgdHVybiw=",
+				"VHJhbnNmb3JtZWQgdXR0ZXJseTo=",
+				"QSB0ZXJyaWJsZSBiZWF1dHkgaXMgYm9ybi4=" };
+
+		@Override
+		public byte[] decrypt(byte[] data) throws Exception {
+			return ctr.decrypt(data);
+		}
+
+		@Override
+		public byte[] encrypt(byte[] data) throws Exception {
+			return ctr.encrypt(data);
+		}
+
+		public byte[][] encrypt() throws Exception {
+			byte[][] res = new byte[strs.length][];
+			for (int i = 0; i < strs.length; i++)
+				res[i] = encrypt(DatatypeConverter.parseBase64Binary(strs[i]));
+			return res;
+		}
+
+	}
+
 
 	static Challenges instance = new Challenges();
 
@@ -392,74 +453,25 @@ public class Challenges {
 	}
 
 	public void C18() throws Exception {
-		CTR ctr = new CTR(new byte[16],"YELLOW SUBMARINE".getBytes());
-		byte[] ciphertxt = DatatypeConverter.parseBase64Binary("L77na/nrFsKvynd6HzOoG7GHTLXsTVu9qvY/2syLXzhPweyyMTJULu/6/kXX0KSvoOLSFQ==");
+		CTR ctr = new CTR(new byte[16], "YELLOW SUBMARINE".getBytes());
+		byte[] ciphertxt = DatatypeConverter
+				.parseBase64Binary("L77na/nrFsKvynd6HzOoG7GHTLXsTVu9qvY/2syLXzhPweyyMTJULu/6/kXX0KSvoOLSFQ==");
 		print(ctr.decrypt(ciphertxt));
 	}
-	
+
+	public void C19() throws Exception {
+		C19Server s = new C19Server();
+		byte[][] ciphertxts = s.encrypt();
+		byte[] keystream = Analysis.attackSingleNonceCTR(ciphertxts);
+		for(int i=0;i<ciphertxts.length;i++)
+			print(Encryption.repeatingXOR(keystream,ciphertxts[i]));
+	}
+
 	public static byte[] createEncryptedProfile(String email) throws Exception {
 		return encryptECB(printKeyValueSet(profileFor(email)).getBytes(),
 				randomKey);
 	}
 
-	public static Map<Character, Double> frequencyEnglish() {
-		HashMap<Character, Double> a = new HashMap<Character, Double>();
-		a.put('a', 8.167);
-		a.put('b', 1.492);
-		a.put('c', 2.782);
-		a.put('d', 4.253);
-		a.put('e', 12.702);
-		a.put('f', 2.228);
-		a.put('g', 2.015);
-		a.put('h', 6.094);
-		a.put('i', 6.966);
-		a.put('j', 0.153);
-		a.put('k', 0.772);
-		a.put('l', 4.025);
-		a.put('m', 2.406);
-		a.put('n', 6.749);
-		a.put('o', 7.507);
-		a.put('p', 1.929);
-		a.put('q', 0.095);
-		a.put('r', 5.987);
-		a.put('s', 6.327);
-		a.put('t', 9.056);
-		a.put('u', 2.758);
-		a.put('v', 0.978);
-		a.put('w', 2.360);
-		a.put('x', 0.150);
-		a.put('y', 1.974);
-		a.put('z', 0.074);
-		a.put('A', 8.167);
-		a.put('B', 1.492);
-		a.put('C', 2.782);
-		a.put('D', 4.253);
-		a.put('E', 12.702);
-		a.put('F', 2.228);
-		a.put('G', 2.015);
-		a.put('H', 6.094);
-		a.put('I', 6.966);
-		a.put('J', 0.153);
-		a.put('K', 0.772);
-		a.put('L', 4.025);
-		a.put('M', 2.406);
-		a.put('N', 6.749);
-		a.put('O', 7.507);
-		a.put('P', 1.929);
-		a.put('Q', 0.095);
-		a.put('R', 5.987);
-		a.put('S', 6.327);
-		a.put('T', 9.056);
-		a.put('U', 2.758);
-		a.put('V', 0.978);
-		a.put('W', 2.360);
-		a.put('X', 0.150);
-		a.put('Y', 1.974);
-		a.put('Z', 0.074);
-		a.put(' ', 15.0);
-
-		return a;
-	}
 
 	public static byte[] generateKey(int keysize) {
 		byte key[] = new byte[keysize];
@@ -475,7 +487,7 @@ public class Challenges {
 	}
 
 	public static void main(String[] args) throws Exception {
-		instance.C18();
+		instance.C19();
 	}
 
 	public static Map<String, String> parseKeyValueSet(String str) {
