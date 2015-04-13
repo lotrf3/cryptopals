@@ -204,7 +204,6 @@ public class Challenges {
 
 	}
 
-
 	static Challenges instance = new Challenges();
 
 	static SecureRandom random = new SecureRandom();
@@ -463,15 +462,30 @@ public class Challenges {
 		C19Server s = new C19Server();
 		byte[][] ciphertxts = s.encrypt();
 		byte[] keystream = Analysis.attackSingleNonceCTR(ciphertxts);
-		for(int i=0;i<ciphertxts.length;i++)
-			print(Encryption.repeatingXOR(keystream,ciphertxts[i]));
+		for (int i = 0; i < ciphertxts.length; i++)
+			print(Encryption.repeatingXOR(keystream, ciphertxts[i]));
+	}
+
+	public void C20() throws Exception {
+		BufferedReader br = new BufferedReader(new FileReader("20.txt"));
+		CTR ctr = new CTR(randomKey, randomIV);
+		byte[][] ciphertxts = new byte[(int) br.lines().count()][];
+		br.close();
+		br = new BufferedReader(new FileReader("20.txt"));
+		for (int i = 0; i < ciphertxts.length; i++) {
+			ciphertxts[i] = ctr.encrypt(DatatypeConverter.parseBase64Binary(br
+					.readLine()));
+		}
+		br.close();
+		byte[] keystream = Analysis.attackSingleNonceCTR(ciphertxts);
+		for (int i = 0; i < ciphertxts.length; i++)
+			print(Encryption.repeatingXOR(keystream, ciphertxts[i]));
 	}
 
 	public static byte[] createEncryptedProfile(String email) throws Exception {
 		return encryptECB(printKeyValueSet(profileFor(email)).getBytes(),
 				randomKey);
 	}
-
 
 	public static byte[] generateKey(int keysize) {
 		byte key[] = new byte[keysize];
@@ -487,7 +501,7 @@ public class Challenges {
 	}
 
 	public static void main(String[] args) throws Exception {
-		instance.C19();
+		instance.C20();
 	}
 
 	public static Map<String, String> parseKeyValueSet(String str) {

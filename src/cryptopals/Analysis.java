@@ -81,6 +81,7 @@ public class Analysis {
 
 	// returns keystream
 	public static byte[] attackSingleNonceCTR(byte[][] ciphertxts) {
+		//TODO can definitely improve statistics here
 		int keystreamLength = 0;
 		for (int i = 0; i < ciphertxts.length; i++)
 			keystreamLength = Math.max(ciphertxts[i].length, keystreamLength);
