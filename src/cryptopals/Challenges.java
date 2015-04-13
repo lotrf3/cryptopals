@@ -181,65 +181,66 @@ public class Challenges {
 		System.out.println(DatatypeConverter.printHexBinary(b3));
 		System.out.println(out);
 	}
-	
-	public void C3(){
 
-		byte[] b1 = DatatypeConverter.parseHexBinary("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736");
+	public void C3() {
+
+		byte[] b1 = DatatypeConverter
+				.parseHexBinary("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736");
 		Map<Character, Double> freq = frequencyEnglish();
 		byte maxByte = 0;
 		double max = 0;
 		String maxString = "";
 		byte[] b3 = new byte[b1.length];
-		for(byte b2 = 0; b2 >= 0; b2++){
+		for (byte b2 = 0; b2 >= 0; b2++) {
 			double score = 0;
-			for(int i=0; i<b1.length; i++)
-				b3[i] =  (byte) (b1[i]^b2);
+			for (int i = 0; i < b1.length; i++)
+				b3[i] = (byte) (b1[i] ^ b2);
 			String x = new String(b3);
-			for(int i=0;i<x.length();i++){
+			for (int i = 0; i < x.length(); i++) {
 				Double s = freq.get(x.charAt(i));
-				if(s != null)
+				if (s != null)
 					score += s;
 			}
-			if(score > max){
+			if (score > max) {
 				max = score;
 				maxByte = b2;
 				maxString = x;
 			}
 		}
-		for(int i=0; i<b1.length; i++)
-			b3[i] =  (byte) (b1[i]^maxByte);
+		for (int i = 0; i < b1.length; i++)
+			b3[i] = (byte) (b1[i] ^ maxByte);
 
 		System.out.println("~~~~~~~~~~~~");
 		System.out.println(maxString);
 		System.out.println(DatatypeConverter.printHexBinary(b3));
-		System.out.println(maxByte);	
-		
+		System.out.println(maxByte);
+
 	}
-	
-	public void C4() throws Exception{
+
+	public void C4() throws Exception {
 		BufferedReader br = new BufferedReader(new FileReader("4.txt"));
-		
+
 		Map<Character, Double> freq = frequencyEnglish();
 		byte maxByte = 0;
 		double max = 0;
 		String maxString = "";
-		while(true){
+		while (true) {
 			String line = br.readLine();
-			if(line == null)
+			if (line == null)
 				break;
-			byte[] b1 = DatatypeConverter.parseHexBinary(line); 
+			byte[] b1 = DatatypeConverter.parseHexBinary(line);
 			byte[] b3 = new byte[b1.length];
-			for(byte b2 = 0; b2 >= 0; b2++){
+			for (byte b2 = 0; b2 >= 0; b2++) {
 				double score = 0;
-				for(int i=0; i<b1.length; i++)
-					b3[i] =  (byte) (b1[i]^b2);
+				for (int i = 0; i < b1.length; i++)
+					b3[i] = (byte) (b1[i] ^ b2);
 				String x = new String(b3);
-				for(int i=0;i<x.length();i++){
+				for (int i = 0; i < x.length(); i++) {
 					Double s = freq.get(x.charAt(i));
-					if(s != null)
+					if (s != null)
 						score += s;
 				}
-				if(score > max){
+				if (score > max) {
 					max = score;
 					maxByte = b2;
 					maxString = x;
@@ -251,10 +252,10 @@ public class Challenges {
 		System.out.println(maxString);
 		System.out.println(maxByte);
 		br.close();
-		
+
 	}
 
-	public static void C5() {
+	public void C5() {
 		String enc = "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal";
 		String key = "ICE";
 
@@ -262,7 +263,7 @@ public class Challenges {
 				enc.getBytes(), key.getBytes())));
 	}
 
-	public static void C6() throws IOException {
+	public void C6() throws IOException {
 		String pathStr = "6.txt";
 		Path path = Paths.get(pathStr);
 		byte[] data = Files.readAllBytes(path);
@@ -275,7 +276,7 @@ public class Challenges {
 
 	}
 
-	public static void C7() throws Exception {
+	public void C7() throws Exception {
 
 		String pathStr = "7.txt";
 		String key = "YELLOW SUBMARINE";
@@ -289,7 +290,7 @@ public class Challenges {
 		System.out.println(new String(decrypted));
 	}
 
-	public static void C8() throws Exception {
+	public void C8() throws Exception {
 
 		String pathStr = "8.txt";
 		BufferedReader br = new BufferedReader(new FileReader(pathStr));
@@ -306,14 +307,14 @@ public class Challenges {
 		br.close();
 	}
 
-	public static void C9() throws Exception {
+	public void C9() throws Exception {
 		System.out.println(new String(pad("YELLOW SUBMARINE".getBytes(), 16)));
 		System.out.println(new String(pad("YELLOW SUBMARINE".getBytes(), 20)));
 		System.out.println(new String(pad("YELLOW SUBMARINE".getBytes(), 8)));
 		System.out.println(new String(pad("YELLOW SUBMARINE".getBytes(), 6)));
 	}
 
-	public static void C10() throws Exception {
+	public void C10() throws Exception {
 		byte[] key = "YELLOW SUBMARINE".getBytes();
 		byte[] iv = DatatypeConverter
 				.parseHexBinary("00000000000000000000000000000000");
@@ -331,7 +332,7 @@ public class Challenges {
 
 	}
 
-	public static void C11() throws Exception {
+	public void C11() throws Exception {
 		String str = "Yellow SubmarineYellow SubmarineYellow SubmarineYellow SubmarineYellow Submarine";
 		for (int i = 0; i < 100; i++) {
 			print(detectBlockPattern(randomEncryption(str.getBytes()), 16, 3) ? "ECB"
@@ -339,8 +340,46 @@ public class Challenges {
 		}
 	}
 
-	public static void C13() throws Exception {
+	public void C12() throws Exception {
+		print(plaintextAttackECB(new C12Server()));
+	}
+
+	public void C13() throws Exception {
 		attackECBProfile();
+	}
+
+	public void C14() throws Exception {
+		attackGeneralECB(new C14Server());
+	}
+
+	public void C15() throws Exception {
+		// throws exception
+		unpad("\u0001\u0002".getBytes());
+	}
+
+	public void C16() throws Exception {
+		C16Server s = new C16Server();
+		byte[] injection = Analysis.injectBitflippingCBC(s,
+				"aaaaa;admin=true".getBytes(), new TestAttack() {
+
+					@Override
+					public boolean test(WebServer s, byte[] injection)
+							throws Exception {
+
+						return ((C16Server) s).isAdmin(injection);
+					}
+				});
+		if (s.isAdmin(injection))
+			print("Success");
+		else
+			print(decryptCBC(injection, randomKey, randomKey));
+
+	}
+
+	public void C17() throws Exception {
+		C17Server s = new C17Server();
+		print(attackCBCPaddingOracle(s));
+
 	}
 
 	public static byte[] createEncryptedProfile(String email) throws Exception {
@@ -527,44 +566,6 @@ public class Challenges {
 			}
 		}
 		return maxChar;
-	}
-
-	public void C12() throws Exception {
-		print(plaintextAttackECB(new C12Server()));
-	}
-
-	public void C14() throws Exception {
-		attackGeneralECB(new C14Server());
-	}
-
-	public void C15() throws Exception {
-		// throws exception
-		unpad("\u0001\u0002".getBytes());
-	}
-
-	public void C16() throws Exception {
-		C16Server s = new C16Server();
-		byte[] injection = Analysis.injectBitflippingCBC(s,
-				"aaaaa;admin=true".getBytes(), new TestAttack() {
-
-					@Override
-					public boolean test(WebServer s, byte[] injection)
-							throws Exception {
-
-						return ((C16Server) s).isAdmin(injection);
-					}
-				});
-		if (s.isAdmin(injection))
-			print("Success");
-		else
-			print(decryptCBC(injection, randomKey, randomKey));
-
-	}
-
-	public void C17() throws Exception {
-		C17Server s = new C17Server();
-		print(attackCBCPaddingOracle(s));
-
 	}
 
 }

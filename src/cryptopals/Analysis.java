@@ -21,6 +21,16 @@ public class Analysis {
 		int b = random.nextInt(length) + offset;
 		data[b] = (byte) random.nextInt();
 	}
+	
+	public static void attackECBProfile() throws Exception {
+
+		// TODO generalize for any order
+		byte[] inj = createEncryptedProfile("fo@bar.comadmin\u000b\u000b\u000b\u000b\u000b\u000b\u000b\u000b\u000b\u000b\u000b");
+		byte[] enc = createEncryptedProfile("foooo@bar.com");
+		System.arraycopy(inj, 16, enc, 32, 16);
+
+		System.out.println(isEncryptedProfileAdmin(enc));
+	}
 
 	public static byte[] plaintextAttackECB(WebServer server) throws Exception {
 		int blockSize = detectECBBlockSize(server);
