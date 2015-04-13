@@ -110,8 +110,8 @@ public class Challenges {
 		@Override
 		public byte[] decrypt(byte[] data) throws Exception {
 			int blockSize = 16;
-			byte[] iv = Arrays.copyOfRange(data, 0,blockSize);
-			byte[] ciphertxt = Arrays.copyOfRange(data,blockSize,data.length);
+			byte[] iv = Arrays.copyOfRange(data, 0, blockSize);
+			byte[] ciphertxt = Arrays.copyOfRange(data, blockSize, data.length);
 			data = decryptCBC(ciphertxt, randomKey, iv);
 			data = unpad(data);
 			throw new GeneralSecurityException();
@@ -136,10 +136,11 @@ public class Challenges {
 		// prepends IV to ciphertxt
 		@Override
 		public byte[] encrypt(byte[] data) throws Exception {
-			return ArrayUtils.concat(randomIV,
+			return Utils.concat(randomIV,
 					encryptCBC(data, randomKey, randomIV));
 		}
 	}
+	
 
 	public static Map<Character, Double> freq = frequencyEnglish();
 
@@ -383,13 +384,19 @@ public class Challenges {
 	public void C17() throws Exception {
 		C17Server s = new C17Server();
 		HashSet<String> set = new HashSet<String>();
-		for(int i=0; i<10;i++)
-			if(set.add(new String(attackCBCPaddingOracle(s))))
-				i=0;
+		for (int i = 0; i < 10; i++)
+			if (set.add(new String(attackCBCPaddingOracle(s))))
+				i = 0;
 		print(set.toString());
 
 	}
 
+	public void C18() throws Exception {
+		CTR ctr = new CTR(new byte[16],"YELLOW SUBMARINE".getBytes());
+		byte[] ciphertxt = DatatypeConverter.parseBase64Binary("L77na/nrFsKvynd6HzOoG7GHTLXsTVu9qvY/2syLXzhPweyyMTJULu/6/kXX0KSvoOLSFQ==");
+		print(ctr.decrypt(ciphertxt));
+	}
+	
 	public static byte[] createEncryptedProfile(String email) throws Exception {
 		return encryptECB(printKeyValueSet(profileFor(email)).getBytes(),
 				randomKey);
@@ -468,7 +475,7 @@ public class Challenges {
 	}
 
 	public static void main(String[] args) throws Exception {
-		instance.C17();
+		instance.C18();
 	}
 
 	public static Map<String, String> parseKeyValueSet(String str) {

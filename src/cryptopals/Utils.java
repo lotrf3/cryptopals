@@ -1,7 +1,14 @@
 package cryptopals;
 
-public class ArrayUtils {
-
+public class Utils {
+	
+	public void swapByteOrder(byte[] a){
+		for(int i=0;i<a.length/2;i++){
+			byte tmp = a[i];
+			a[i] = a[a.length - 1 - i];
+			a[a.length - 1 - i] = tmp;
+		}
+	}
 	
 	public static byte[] concat(byte[] a, byte[] b) {
 		return concat(a, 0, a.length, b, 0, b.length);

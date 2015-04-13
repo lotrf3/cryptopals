@@ -42,7 +42,7 @@ public class Analysis {
 				for (int k = Byte.MIN_VALUE; k <= Byte.MAX_VALUE; k++) {
 					guess[(i + 1) * blockSize - 1] = (byte) k;
 					byte[] res = server.encrypt(guess);
-					if (ArrayUtils.equals(res, i * blockSize, ciphertxt, i
+					if (Utils.equals(res, i * blockSize, ciphertxt, i
 							* blockSize, blockSize)) {
 						decrypted[j + i * blockSize] = (byte) k;
 						break;
@@ -129,12 +129,12 @@ public class Analysis {
 				int index = -1;
 				while (index == -1) {
 					ciphertxt = server.encrypt(test[j]);
-					index = ArrayUtils.containsBlock(ciphertxt, marker,
+					index = Utils.containsBlock(ciphertxt, marker,
 							blockSize);
 				}
 				for (int k = Byte.MIN_VALUE; k <= Byte.MAX_VALUE; k++) {
 					int kIndex = (k - Byte.MIN_VALUE + 1) * blockSize;
-					if (ArrayUtils.equals(ciphertxt, index + kIndex, ciphertxt,
+					if (Utils.equals(ciphertxt, index + kIndex, ciphertxt,
 							index + (i + C256 + 1) * blockSize, blockSize)) {
 						decrypted[i * blockSize + j] = (byte) k;
 						break;
@@ -152,12 +152,12 @@ public class Analysis {
 		byte[] a = server.encrypt(marker);
 		marker[0] = (byte) (marker[0] ^ 0xFF);
 		byte[] b = server.encrypt(marker);
-		int index = ArrayUtils.firstNonEqualByte(a, b);
+		int index = Utils.firstNonEqualByte(a, b);
 		marker[0] = (byte) (marker[0] ^ 0xFF);
 		for (int i = 1; i < blockSize; i++) {
 			marker[i] = (byte) (marker[i] ^ 0xFF);
 			b = server.encrypt(marker);
-			int x = ArrayUtils.firstNonEqualByte(a, b);
+			int x = Utils.firstNonEqualByte(a, b);
 			if (index != x)
 				return new int[] { i, x };
 			marker[i] = (byte) (marker[i] ^ 0xFF);
@@ -294,7 +294,7 @@ public class Analysis {
 				byte[] injCipher = Arrays.copyOf(enc, enc.length);
 				byte[] cipher = new byte[blockSize];
 				int inOffset = blockRes[1];
-				outOffset = ArrayUtils.indexOf(s.decrypt(enc), plainbytes)
+				outOffset = Utils.indexOf(s.decrypt(enc), plainbytes)
 						+ padding + blockSize;
 				for (int i = 0; i < blockSize; i++) {
 					for (int j = Byte.MIN_VALUE; j <= Byte.MAX_VALUE; j++) {
