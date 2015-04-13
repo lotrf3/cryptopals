@@ -1,7 +1,5 @@
 package cryptopals;
 
-import static cryptopals.Challenges.print;
-
 import java.util.Arrays;
 
 import javax.crypto.BadPaddingException;

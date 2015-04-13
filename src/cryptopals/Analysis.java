@@ -1,6 +1,5 @@
 package cryptopals;
 
-import static cryptopals.Challenges.print;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -59,7 +58,6 @@ public class Analysis {
 		byte[] ciphertxtWithIV = s.encrypt();
 		byte[] ciphertxt = Arrays.copyOfRange(ciphertxtWithIV, blockSize,
 				ciphertxtWithIV.length);
-		byte[] iv = Arrays.copyOfRange(ciphertxtWithIV, 0, blockSize);
 		byte[] decrypted = new byte[ciphertxt.length];
 		byte[] intermediate = new byte[ciphertxt.length];
 		for (int i = 0; i < ciphertxt.length; i += blockSize) {
