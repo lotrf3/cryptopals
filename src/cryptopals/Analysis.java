@@ -16,6 +16,13 @@ public class Analysis {
 	private static String marker64 = "ABCDEFGHIJKLMNOPQRSTUVWXWZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 	
+	public static int findTimestampSeededRandMT19937(int rnd, int timestamp) throws Exception{
+		for(int t = timestamp;t<0;t--)
+			if(new MT19937(t).nextInt() == rnd)
+				return t;
+		throw new Exception();
+	}
+	
 	public static int untemperRandMT19937(int a){
 		int b = a ^ (a >>> 18);
 		

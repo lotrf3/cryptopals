@@ -513,6 +513,15 @@ public class Challenges {
 		System.out.println(r.nextInt());
 		System.out.println(r.nextInt());
 	}
+	
+	public void C22() throws Exception{
+		int t1 = (int) System.currentTimeMillis();
+		MT19937 r = new MT19937(t1);
+		int rnd = r.nextInt();
+		int t2 = t1 + r.nextInt(1000) +4;
+		int t1Copy = Analysis.findTimestampSeededRandMT19937(rnd,t2);
+		System.out.print(t1 + " " + t1Copy);
+	}
 
 	public void C23() {
 		MT19937 r1 = new MT19937(1);
@@ -544,7 +553,7 @@ public class Challenges {
 	}
 
 	public static void main(String[] args) throws Exception {
-		instance.C23();
+		instance.C22();
 	}
 
 	public static Map<String, String> parseKeyValueSet(String str) {
