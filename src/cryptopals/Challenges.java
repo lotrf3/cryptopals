@@ -481,6 +481,38 @@ public class Challenges {
 		for (int i = 0; i < ciphertxts.length; i++)
 			print(Encryption.repeatingXOR(keystream, ciphertxts[i]));
 	}
+	
+	public void C21(){
+		MT19937 r = new MT19937(1);
+		System.out.println(r.nextInt());
+		System.out.println(r.nextInt());
+		System.out.println(r.nextInt());
+		System.out.println(r.nextInt());
+		System.out.println(r.nextInt());
+		System.out.println(r.nextInt());
+		System.out.println(r.nextInt());
+		System.out.println(r.nextInt());
+		System.out.println(r.nextInt());
+		System.out.println(r.nextInt());
+		System.out.println(r.nextInt());
+		System.out.println(r.nextInt());
+		System.out.println(r.nextInt());
+		System.out.println(r.nextInt());
+		System.out.println(r.nextInt());
+		System.out.println(r.nextInt());
+		System.out.println(r.nextInt());
+		System.out.println(r.nextInt());
+		System.out.println(r.nextInt());
+		System.out.println(r.nextInt());
+		System.out.println(r.nextInt());
+		System.out.println(r.nextInt());
+		System.out.println(r.nextInt());
+		System.out.println(r.nextInt());
+		System.out.println(r.nextInt());
+		System.out.println(r.nextInt());
+		System.out.println(r.nextInt());
+		System.out.println(r.nextInt());
+	}
 
 	public static byte[] createEncryptedProfile(String email) throws Exception {
 		return encryptECB(printKeyValueSet(profileFor(email)).getBytes(),
@@ -501,7 +533,7 @@ public class Challenges {
 	}
 
 	public static void main(String[] args) throws Exception {
-		instance.C20();
+		instance.C21();
 	}
 
 	public static Map<String, String> parseKeyValueSet(String str) {
