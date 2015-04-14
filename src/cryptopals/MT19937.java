@@ -5,16 +5,22 @@ import java.util.Random;
 public class MT19937 extends Random {
 	private static final long serialVersionUID = 7590131823439013877L;
 
-	public MT19937(int seed){
+	public MT19937(int seed) {
 		setSeed(seed);
 	}
-	
-	public void setSeed(int seed){
+
+	public MT19937(int[] state) {
+		if (state.length != 624)
+			throw new IllegalArgumentException();
+		mt = state;
+	}
+
+	public void setSeed(int seed) {
 		index = 0;
 		mt[0] = seed;
 		for (int i = 1; i < 624; i++)
 			mt[i] = 1812433253 * (mt[i - 1] ^ (mt[i - 1] >>> 30)) + i;
-		
+
 	}
 
 	int[] mt = new int[624];
@@ -33,13 +39,13 @@ public class MT19937 extends Random {
 	public int nextInt() {
 		if (index == 0)
 			generateNumbers();
-		int y = mt[index];
-		y = y ^ (y >>> 11);
-		y = y ^ (y << 7) & 0x9d2c5680;
-		y = y ^ (y << 15) & 0xefc60000;
-		y = y ^ (y >>> 18);
+		int e = mt[index];
+		int d = e ^ (e >>> 11);
+		int c = d ^ ((d << 7) & 0x9d2c5680);
+		int b = c ^ ((c << 15) & 0xefc60000);
+		int a =  b ^ (b >>> 18);
 		index = (index + 1) % 624;
-		return y;
+		return a;
 	}
 
 	@Override

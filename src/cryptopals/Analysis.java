@@ -15,6 +15,32 @@ public class Analysis {
 	private static SecureRandom random = new SecureRandom();
 	private static String marker64 = "ABCDEFGHIJKLMNOPQRSTUVWXWZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
+	
+	public static int untemperRandMT19937(int a){
+		int b = a ^ (a >>> 18);
+		
+		int c = b ^ ((b << 15) & 0xefc60000);
+		
+		int d = c;
+		d = c ^ ((d << 7) & 0x9d2c5680);
+		d = c ^ ((d << 7) & 0x9d2c5680);
+		d = c ^ ((d << 7) & 0x9d2c5680);
+		d = c ^ ((d << 7) & 0x9d2c5680);
+		
+		int y = d;
+		y = d ^ (y >>> 11);
+		y = d ^ (y >>> 11);
+		return y;
+	}
+	public static MT19937 cloneRandMT19937(MT19937 rand){
+		int[] state = new int[624];
+		for(int i=0;i<624;i++)
+			state[i] = untemperRandMT19937(rand.nextInt());
+		
+		return new MT19937(state);
+		
+	}
+	
 	public static void alterRandomByte(byte[] data, int offset, int length) {
 		int b = random.nextInt(length) + offset;
 		data[b] = (byte) random.nextInt();

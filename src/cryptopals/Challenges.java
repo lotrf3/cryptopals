@@ -481,8 +481,8 @@ public class Challenges {
 		for (int i = 0; i < ciphertxts.length; i++)
 			print(Encryption.repeatingXOR(keystream, ciphertxts[i]));
 	}
-	
-	public void C21(){
+
+	public void C21() {
 		MT19937 r = new MT19937(1);
 		System.out.println(r.nextInt());
 		System.out.println(r.nextInt());
@@ -514,6 +514,17 @@ public class Challenges {
 		System.out.println(r.nextInt());
 	}
 
+	public void C23() {
+		MT19937 r1 = new MT19937(1);
+		MT19937 r2 = Analysis.cloneRandMT19937(r1);
+		System.out.println(r1.nextInt());
+		System.out.println(r2.nextInt());
+		System.out.println(r1.nextInt());
+		System.out.println(r2.nextInt());
+		System.out.println(r1.nextInt());
+		System.out.println(r2.nextInt());
+	}
+
 	public static byte[] createEncryptedProfile(String email) throws Exception {
 		return encryptECB(printKeyValueSet(profileFor(email)).getBytes(),
 				randomKey);
@@ -533,7 +544,7 @@ public class Challenges {
 	}
 
 	public static void main(String[] args) throws Exception {
-		instance.C21();
+		instance.C23();
 	}
 
 	public static Map<String, String> parseKeyValueSet(String str) {
