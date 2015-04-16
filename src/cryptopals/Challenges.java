@@ -2,6 +2,7 @@ package cryptopals;
 
 import static cryptopals.Encryption.*;
 import static cryptopals.Analysis.*;
+import static cryptopals.Utils.print;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -15,6 +16,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Random;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -200,6 +202,36 @@ public class Challenges {
 			for (int i = 0; i < strs.length; i++)
 				res[i] = encrypt(DatatypeConverter.parseBase64Binary(strs[i]));
 			return res;
+		}
+
+	}
+
+	class C24Server implements WebServer {
+
+		SecureRandom r2;
+		Random r1;
+		public RandomStreamCipher16 rsc;
+
+		public C24Server() {
+			r2 = new SecureRandom();
+			r1 = new MT19937(0);
+			rsc = new RandomStreamCipher16(r1);
+			rsc.setSeed(r2.nextInt());
+
+		}
+
+		@Override
+		public byte[] decrypt(byte[] data) throws Exception {
+			return rsc.decrypt(data);
+		}
+
+		@Override
+		public byte[] encrypt(byte[] data) throws Exception {
+			byte[] prefix = new byte[r2.nextInt(1000)];
+			r2.nextBytes(prefix);
+			byte[] cpy = Arrays.copyOf(prefix, prefix.length + data.length);
+			System.arraycopy(data, 0, cpy, prefix.length, data.length);
+			return rsc.encrypt(cpy);
 		}
 
 	}
@@ -513,13 +545,13 @@ public class Challenges {
 		System.out.println(r.nextInt());
 		System.out.println(r.nextInt());
 	}
-	
-	public void C22() throws Exception{
+
+	public void C22() throws Exception {
 		int t1 = (int) System.currentTimeMillis();
 		MT19937 r = new MT19937(t1);
 		int rnd = r.nextInt();
-		int t2 = t1 + r.nextInt(1000) +4;
-		int t1Copy = Analysis.findTimestampSeededRandMT19937(rnd,t2);
+		int t2 = t1 + r.nextInt(1000) + 4;
+		int t1Copy = Analysis.findTimestampSeededRandMT19937(rnd, t2);
 		System.out.print(t1 + " " + t1Copy);
 	}
 
@@ -532,6 +564,10 @@ public class Challenges {
 		System.out.println(r2.nextInt());
 		System.out.println(r1.nextInt());
 		System.out.println(r2.nextInt());
+	}
+
+	public void C24() throws Exception {
+		print(bruteMT19937Cipher(new C24Server()));
 	}
 
 	public static byte[] createEncryptedProfile(String email) throws Exception {
@@ -553,7 +589,7 @@ public class Challenges {
 	}
 
 	public static void main(String[] args) throws Exception {
-		instance.C22();
+		instance.C24();
 	}
 
 	public static Map<String, String> parseKeyValueSet(String str) {
@@ -569,19 +605,6 @@ public class Challenges {
 			map.put(x[0], x[1]);
 		}
 		return map;
-	}
-
-	public static void print(byte data) {
-		System.out.print((char) data);
-
-	}
-
-	public static void print(byte[] data) {
-		System.out.println(new String(data));
-	}
-
-	private static void print(String str) {
-		System.out.println(str);
 	}
 
 	public static String printKeyValueSet(Map<String, String> map) {

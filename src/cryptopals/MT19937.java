@@ -6,7 +6,7 @@ public class MT19937 extends Random {
 	private static final long serialVersionUID = 7590131823439013877L;
 
 	public MT19937(int seed) {
-		setSeed(seed);
+		super(seed);
 	}
 
 	public MT19937(int[] state) {
@@ -15,16 +15,19 @@ public class MT19937 extends Random {
 		mt = state;
 	}
 
-	public void setSeed(int seed) {
+	@Override
+	public void setSeed(long seed) {
+		if(mt == null)
+			mt = new int[624];
 		index = 0;
-		mt[0] = seed;
+		mt[0] = (int) seed;
 		for (int i = 1; i < 624; i++)
 			mt[i] = 1812433253 * (mt[i - 1] ^ (mt[i - 1] >>> 30)) + i;
 
 	}
 
-	int[] mt = new int[624];
-	int index = 0;
+	int[] mt;
+	int index;
 
 	private void generateNumbers() {
 		for (int i = 0; i < 624; i++) {
@@ -43,7 +46,7 @@ public class MT19937 extends Random {
 		int d = e ^ (e >>> 11);
 		int c = d ^ ((d << 7) & 0x9d2c5680);
 		int b = c ^ ((c << 15) & 0xefc60000);
-		int a =  b ^ (b >>> 18);
+		int a = b ^ (b >>> 18);
 		index = (index + 1) % 624;
 		return a;
 	}

@@ -1,18 +1,19 @@
 package cryptopals;
 
 public class Utils {
-	
-	public void swapByteOrder(byte[] a){
-		for(int i=0;i<a.length/2;i++){
+
+	public void swapByteOrder(byte[] a) {
+		for (int i = 0; i < a.length / 2; i++) {
 			byte tmp = a[i];
 			a[i] = a[a.length - 1 - i];
 			a[a.length - 1 - i] = tmp;
 		}
 	}
-	
+
 	public static byte[] concat(byte[] a, byte[] b) {
 		return concat(a, 0, a.length, b, 0, b.length);
 	}
+
 	public static byte[] concat(byte[] a, int aOffset, int aLength, byte[] b,
 			int bOffset, int bLength) {
 		byte[] res = new byte[aLength + bLength];
@@ -51,11 +52,24 @@ public class Utils {
 	}
 
 	public static int indexOf(byte[] a, byte[] b) {
-		for (int i = 0; i < a.length; i++) {
+		for (int i = 0; i + b.length <= a.length; i++) {
 			if (equals(a, i, b, 0, b.length))
 				return i;
 		}
 		return -1;
+	}
+
+	public static void print(byte data) {
+		System.out.print((char) data);
+
+	}
+
+	public static void print(byte[] data) {
+		System.out.println(new String(data));
+	}
+
+	static void print(String str) {
+		System.out.println(str);
 	}
 
 }

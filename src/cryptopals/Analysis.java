@@ -1,5 +1,7 @@
 package cryptopals;
 
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -15,39 +17,78 @@ public class Analysis {
 	private static SecureRandom random = new SecureRandom();
 	private static String marker64 = "ABCDEFGHIJKLMNOPQRSTUVWXWZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-	
-	public static int findTimestampSeededRandMT19937(int rnd, int timestamp) throws Exception{
-		for(int t = timestamp;t<0;t--)
-			if(new MT19937(t).nextInt() == rnd)
+	public static byte[] bruteMT19937Cipher(WebServer s)
+			throws Exception {
+		byte[] mark = marker64.getBytes();
+		byte[] ciphertxt = s.encrypt(mark);
+		RandomStreamCipher16 rsc = new RandomStreamCipher16(new MT19937(0));
+		for(int i=0;i<rsc.MAX_KEY_SIZE;i++){
+			rsc.setSeed(i);
+			byte[] cleartxt = rsc.decrypt(ciphertxt);
+			if(Utils.indexOf(cleartxt,mark) != -1)
+				return cleartxt;
+		}
+		return null;
+	}
+
+	public static byte[] injectionCloneMT19937Cipher(WebServer s)
+			throws Exception {
+		byte[] mark = new byte[624 * 4 * 2];
+		byte[] ciphertxt = s.encrypt(mark);
+		for (int i = 0; i < 4; i++) {
+			IntBuffer intBuf = ByteBuffer.wrap(ciphertxt, i,
+					ciphertxt.length - i).asIntBuffer();
+			int[] ints = new int[intBuf.remaining()];
+			intBuf.get(ints);
+			int[] untempered = new int[ints.length];
+			for (int j = 0; j < ints.length; j++)
+				untempered[j] = untemperRandMT19937(ints[j]);
+			int blockIndex;
+			for (blockIndex = 0; blockIndex + 625 < untempered.length; blockIndex++) {
+				MT19937 rand = new MT19937(Arrays.copyOfRange(untempered,
+						blockIndex, blockIndex + 624));
+				if (rand.nextInt() == ints[blockIndex + 624]) {
+					// return new RandomStreamCipher(rand);
+				}
+			}
+		}
+		return null;
+	}
+
+	public static int findTimestampSeededRandMT19937(int rnd, int timestamp)
+			throws Exception {
+		for (int t = timestamp; t < 0; t--)
+			if (new MT19937(t).nextInt() == rnd)
 				return t;
 		throw new Exception();
 	}
-	
-	public static int untemperRandMT19937(int a){
+
+	public static int untemperRandMT19937(int a) {
 		int b = a ^ (a >>> 18);
-		
+
 		int c = b ^ ((b << 15) & 0xefc60000);
-		
+
 		int d = c;
 		d = c ^ ((d << 7) & 0x9d2c5680);
 		d = c ^ ((d << 7) & 0x9d2c5680);
 		d = c ^ ((d << 7) & 0x9d2c5680);
 		d = c ^ ((d << 7) & 0x9d2c5680);
-		
+
 		int y = d;
 		y = d ^ (y >>> 11);
 		y = d ^ (y >>> 11);
 		return y;
 	}
-	public static MT19937 cloneRandMT19937(MT19937 rand){
+
+	public static MT19937 cloneRandMT19937(MT19937 rand) {
 		int[] state = new int[624];
-		for(int i=0;i<624;i++)
+		for (int i = 0; i < 624; i++)
 			state[i] = untemperRandMT19937(rand.nextInt());
-		
+
 		return new MT19937(state);
-		
+
 	}
-	
+
 	public static void alterRandomByte(byte[] data, int offset, int length) {
 		int b = random.nextInt(length) + offset;
 		data[b] = (byte) random.nextInt();
@@ -114,7 +155,7 @@ public class Analysis {
 
 	// returns keystream
 	public static byte[] attackSingleNonceCTR(byte[][] ciphertxts) {
-		//TODO can definitely improve statistics here
+		// TODO can definitely improve statistics here
 		int keystreamLength = 0;
 		for (int i = 0; i < ciphertxts.length; i++)
 			keystreamLength = Math.max(ciphertxts[i].length, keystreamLength);
