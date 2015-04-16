@@ -250,10 +250,47 @@ public class Challenges {
 			return ctr.encrypt(data);
 		}
 
-		public byte[] edit(byte[] ciphertxt, int offset, byte[] newtxt) throws Exception {
+		public byte[] edit(byte[] ciphertxt, int offset, byte[] newtxt)
+				throws Exception {
 			byte[] plaintxt = ctr.decrypt(ciphertxt);
 			System.arraycopy(newtxt, 0, plaintxt, offset, newtxt.length);
 			return ctr.encrypt(plaintxt);
+		}
+
+	}
+
+	class C26Server implements WebServer {
+		
+		CTR ctr = new CTR(randomIV, randomKey);
+
+		public byte[] decrypt(byte[] data) throws Exception {
+			data = ctr.decrypt(data);
+			String str = new String(data);
+			return parseKeyValueSet(str, ";", "=").get("userdata").getBytes();
+		}
+
+		@Override
+		public byte[] encrypt(byte[] data) throws Exception {
+			byte[] pre = "comment1=cooking%20MC;userdata=".getBytes();
+			byte[] post = ";comment2=%20like%20a%20pound%20of%20bacon"
+					.getBytes();
+			byte[] plaintxt = new byte[pre.length + data.length + post.length];
+			System.arraycopy(pre, 0, plaintxt, 0, pre.length);
+			System.arraycopy(data, 0, plaintxt, pre.length, data.length);
+			System.arraycopy(post, 0, plaintxt, pre.length + data.length,
+					post.length);
+			return ctr.encrypt(plaintxt);
+		}
+
+		public byte[] encrypt(String str) throws Exception {
+			str = sanitizeQueryParam(str);
+			return encrypt(str.getBytes());
+		}
+
+		public boolean isAdmin(byte[] data) throws Exception {
+			data = ctr.decrypt(data);
+			String str = new String(data);
+			return "true".equals(parseKeyValueSet(str, ";", "=").get("admin"));
 		}
 
 	}
@@ -591,6 +628,7 @@ public class Challenges {
 	public void C24() throws Exception {
 		print(bruteMT19937Cipher(new C24Server()));
 	}
+
 	public void C25() throws Exception {
 		Path path = Paths.get("25.txt");
 		byte[] data = Files.readAllBytes(path);
@@ -600,6 +638,15 @@ public class Challenges {
 		C25Server s = new C25Server();
 		byte[] ciphertxt = s.encrypt(data);
 		print(Analysis.attackEditableCTR(ciphertxt, s));
+	}
+
+	public void C26() throws Exception {
+		C26Server s = new C26Server();
+		byte[] injection = injectBitflippingCTR(s, "a;admin=true".getBytes());
+
+		if (s.isAdmin(injection))
+			print("Success");
+		
 	}
 
 	public static byte[] createEncryptedProfile(String email) throws Exception {
@@ -621,7 +668,7 @@ public class Challenges {
 	}
 
 	public static void main(String[] args) throws Exception {
-		instance.C25();
+		instance.C26();
 	}
 
 	public static Map<String, String> parseKeyValueSet(String str) {

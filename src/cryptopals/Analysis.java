@@ -18,23 +18,37 @@ public class Analysis {
 	private static SecureRandom random = new SecureRandom();
 	private static String marker64 = "ABCDEFGHIJKLMNOPQRSTUVWXWZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-	public static byte[] attackEditableCTR(byte[] ciphertxt, C25Server s) throws Exception{
+	public static byte[] injectBitflippingCTR(WebServer s, byte[] payload) throws Exception {
+		byte[] knowntxt1 = marker64.substring(0, payload.length).getBytes();
+		byte[] ciphertxt1 = s.encrypt(knowntxt1);
+		byte[] knowntxt2 = marker64.substring(1, payload.length + 1).getBytes();
+		byte[] ciphertxt2 = s.encrypt(knowntxt2);
+		int offset = Utils.firstNonEqualByte(ciphertxt1, ciphertxt2);
+		byte[] key = Encryption.repeatingXOR(ciphertxt1, offset,
+				payload.length, knowntxt1, 0, payload.length, payload.length);
+		byte[] cipherPayload = Encryption.repeatingXOR(key, payload);
+		System.arraycopy(cipherPayload, 0, ciphertxt1, offset, payload.length);
+
+		return ciphertxt1;
+	}
+
+	public static byte[] attackEditableCTR(byte[] ciphertxt, C25Server s)
+			throws Exception {
 		byte[] inj = new byte[ciphertxt.length];
-		//Arrays.fill(inj, (byte)' ');
+		// Arrays.fill(inj, (byte)' ');
 		byte[] alteredtxt = s.edit(ciphertxt, 0, inj);
 		byte[] key = Encryption.repeatingXOR(alteredtxt, ciphertxt);
 		return Encryption.repeatingXOR(key, inj);
 	}
-	
-	public static byte[] bruteMT19937Cipher(WebServer s)
-			throws Exception {
+
+	public static byte[] bruteMT19937Cipher(WebServer s) throws Exception {
 		byte[] mark = marker64.getBytes();
 		byte[] ciphertxt = s.encrypt(mark);
 		RandomStreamCipher16 rsc = new RandomStreamCipher16(new MT19937(0));
-		for(int i=0;i<rsc.MAX_KEY_SIZE;i++){
+		for (int i = 0; i < rsc.MAX_KEY_SIZE; i++) {
 			rsc.setSeed(i);
 			byte[] cleartxt = rsc.decrypt(ciphertxt);
-			if(Utils.indexOf(cleartxt,mark) != -1)
+			if (Utils.indexOf(cleartxt, mark) != -1)
 				return cleartxt;
 		}
 		return null;
