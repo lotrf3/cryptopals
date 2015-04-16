@@ -260,7 +260,7 @@ public class Challenges {
 	}
 
 	class C26Server implements WebServer {
-		
+
 		CTR ctr = new CTR(randomIV, randomKey);
 
 		public byte[] decrypt(byte[] data) throws Exception {
@@ -289,6 +289,43 @@ public class Challenges {
 
 		public boolean isAdmin(byte[] data) throws Exception {
 			data = ctr.decrypt(data);
+			String str = new String(data);
+			return "true".equals(parseKeyValueSet(str, ";", "=").get("admin"));
+		}
+
+	}
+
+	class C27Server implements WebServer {
+
+		public byte[] decrypt(byte[] data) throws Exception {
+			data = decryptCBC(data, randomKey, randomKey);
+			for(int i=0;i<data.length;i++)
+				if(!Utils.isValidASCII(data[i]))
+					throw new IllegalArgumentException("This is not valid ASCII:" + new String(data));
+			String str = new String(data);
+			return parseKeyValueSet(str, ";", "=").get("userdata").getBytes();
+		}
+
+		@Override
+		public byte[] encrypt(byte[] data) throws Exception {
+			byte[] pre = "comment1=cooking%20MC;userdata=".getBytes();
+			byte[] post = ";comment2=%20like%20a%20pound%20of%20bacon"
+					.getBytes();
+			byte[] plaintxt = new byte[pre.length + data.length + post.length];
+			System.arraycopy(pre, 0, plaintxt, 0, pre.length);
+			System.arraycopy(data, 0, plaintxt, pre.length, data.length);
+			System.arraycopy(post, 0, plaintxt, pre.length + data.length,
+					post.length);
+			return encryptCBC(plaintxt, randomKey, randomKey);
+		}
+
+		public byte[] encrypt(String str) throws Exception {
+			str = sanitizeQueryParam(str);
+			return encrypt(str.getBytes());
+		}
+
+		public boolean isAdmin(byte[] data) throws Exception {
+			data = decryptCBC(data, randomKey, randomKey);
 			String str = new String(data);
 			return "true".equals(parseKeyValueSet(str, ";", "=").get("admin"));
 		}
@@ -646,7 +683,13 @@ public class Challenges {
 
 		if (s.isAdmin(injection))
 			print("Success");
-		
+
+	}
+
+	public void C27() throws Exception {
+		C27Server s = new C27Server();
+		print(Analysis.recoverCBCKeyIsIV(s, s.encrypt("asdf")));
+		print(randomKey);
 	}
 
 	public static byte[] createEncryptedProfile(String email) throws Exception {
@@ -668,7 +711,7 @@ public class Challenges {
 	}
 
 	public static void main(String[] args) throws Exception {
-		instance.C26();
+		instance.C27();
 	}
 
 	public static Map<String, String> parseKeyValueSet(String str) {

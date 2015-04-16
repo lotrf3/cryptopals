@@ -18,7 +18,28 @@ public class Analysis {
 	private static SecureRandom random = new SecureRandom();
 	private static String marker64 = "ABCDEFGHIJKLMNOPQRSTUVWXWZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-	public static byte[] injectBitflippingCTR(WebServer s, byte[] payload) throws Exception {
+	public static byte[] recoverCBCKeyIsIV(WebServer s, byte[] ciphertxt) throws Exception {
+		int blockSize = 16;
+		if(ciphertxt.length < blockSize*3)
+			throw new Exception("Need 3 blocks of ciphertxt");
+		byte[] inj = new byte[ciphertxt.length];
+		System.arraycopy(ciphertxt, 0, inj, 0, blockSize);
+		System.arraycopy(ciphertxt, 0, inj, blockSize*2, blockSize);
+		try{
+			s.decrypt(inj);
+		
+		}
+		catch(IllegalArgumentException iaex){
+			String msg = iaex.getMessage();
+			byte[] plaintxt = msg.split(":")[1].getBytes();
+			byte[] key = Encryption.repeatingXOR(plaintxt, 0, blockSize, plaintxt, blockSize*2, blockSize, blockSize);
+			return key;
+		}
+		return null;
+	}
+
+	public static byte[] injectBitflippingCTR(WebServer s, byte[] payload)
+			throws Exception {
 		byte[] knowntxt1 = marker64.substring(0, payload.length).getBytes();
 		byte[] ciphertxt1 = s.encrypt(knowntxt1);
 		byte[] knowntxt2 = marker64.substring(1, payload.length + 1).getBytes();

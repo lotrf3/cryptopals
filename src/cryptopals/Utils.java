@@ -71,5 +71,9 @@ public class Utils {
 	static void print(String str) {
 		System.out.println(str);
 	}
+	
+	public static boolean isValidASCII(byte b){
+		return (b >= 20 && b <= 126) || b == '\n';  
+	}
 
 }
