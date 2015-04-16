@@ -299,9 +299,10 @@ public class Challenges {
 
 		public byte[] decrypt(byte[] data) throws Exception {
 			data = decryptCBC(data, randomKey, randomKey);
-			for(int i=0;i<data.length;i++)
-				if(!Utils.isValidASCII(data[i]))
-					throw new IllegalArgumentException("This is not valid ASCII:" + new String(data));
+			for (int i = 0; i < data.length; i++)
+				if (!Utils.isValidASCII(data[i]))
+					throw new IllegalArgumentException(
+							"This is not valid ASCII:" + new String(data));
 			String str = new String(data);
 			return parseKeyValueSet(str, ";", "=").get("userdata").getBytes();
 		}
@@ -692,6 +693,14 @@ public class Challenges {
 		print(randomKey);
 	}
 
+	public void C28() throws Exception {
+		SHA1 sha1 = new SHA1();
+
+		print(sha1.hash(Utils.concat(randomKey, "test".getBytes())));
+		print(sha1.hash(Utils.concat(randomKey, "test".getBytes())));
+		print(sha1.hash(Utils.concat(randomKey, "tes1".getBytes())));
+	}
+
 	public static byte[] createEncryptedProfile(String email) throws Exception {
 		return encryptECB(printKeyValueSet(profileFor(email)).getBytes(),
 				randomKey);
@@ -711,7 +720,7 @@ public class Challenges {
 	}
 
 	public static void main(String[] args) throws Exception {
-		instance.C27();
+		instance.C28();
 	}
 
 	public static Map<String, String> parseKeyValueSet(String str) {
