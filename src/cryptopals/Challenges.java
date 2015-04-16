@@ -236,6 +236,28 @@ public class Challenges {
 
 	}
 
+	class C25Server implements WebServer {
+
+		CTR ctr = new CTR(randomIV, randomKey);
+
+		@Override
+		public byte[] decrypt(byte[] data) throws Exception {
+			return ctr.decrypt(data);
+		}
+
+		@Override
+		public byte[] encrypt(byte[] data) throws Exception {
+			return ctr.encrypt(data);
+		}
+
+		public byte[] edit(byte[] ciphertxt, int offset, byte[] newtxt) throws Exception {
+			byte[] plaintxt = ctr.decrypt(ciphertxt);
+			System.arraycopy(newtxt, 0, plaintxt, offset, newtxt.length);
+			return ctr.encrypt(plaintxt);
+		}
+
+	}
+
 	static Challenges instance = new Challenges();
 
 	static SecureRandom random = new SecureRandom();
@@ -569,6 +591,16 @@ public class Challenges {
 	public void C24() throws Exception {
 		print(bruteMT19937Cipher(new C24Server()));
 	}
+	public void C25() throws Exception {
+		Path path = Paths.get("25.txt");
+		byte[] data = Files.readAllBytes(path);
+		data = DatatypeConverter.parseBase64Binary(new String(data));
+		data = Encryption.decryptECB(data, "YELLOW SUBMARINE".getBytes());
+		data = Encryption.unpad(data);
+		C25Server s = new C25Server();
+		byte[] ciphertxt = s.encrypt(data);
+		print(Analysis.attackEditableCTR(ciphertxt, s));
+	}
 
 	public static byte[] createEncryptedProfile(String email) throws Exception {
 		return encryptECB(printKeyValueSet(profileFor(email)).getBytes(),
@@ -589,7 +621,7 @@ public class Challenges {
 	}
 
 	public static void main(String[] args) throws Exception {
-		instance.C24();
+		instance.C25();
 	}
 
 	public static Map<String, String> parseKeyValueSet(String str) {

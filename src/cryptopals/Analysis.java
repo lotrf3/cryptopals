@@ -11,12 +11,21 @@ import javax.crypto.BadPaddingException;
 import javax.xml.bind.DatatypeConverter;
 
 import cryptopals.Challenges.C17Server;
+import cryptopals.Challenges.C25Server;
 
 public class Analysis {
 	public static Map<Character, Double> freq = frequencyEnglish();
 	private static SecureRandom random = new SecureRandom();
 	private static String marker64 = "ABCDEFGHIJKLMNOPQRSTUVWXWZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
+	public static byte[] attackEditableCTR(byte[] ciphertxt, C25Server s) throws Exception{
+		byte[] inj = new byte[ciphertxt.length];
+		//Arrays.fill(inj, (byte)' ');
+		byte[] alteredtxt = s.edit(ciphertxt, 0, inj);
+		byte[] key = Encryption.repeatingXOR(alteredtxt, ciphertxt);
+		return Encryption.repeatingXOR(key, inj);
+	}
+	
 	public static byte[] bruteMT19937Cipher(WebServer s)
 			throws Exception {
 		byte[] mark = marker64.getBytes();
