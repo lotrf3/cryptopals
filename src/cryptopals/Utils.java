@@ -1,5 +1,8 @@
 package cryptopals;
 
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+
 public class Utils {
 
 	public void swapByteOrder(byte[] a) {
@@ -38,6 +41,10 @@ public class Utils {
 		return true;
 	}
 
+	public static boolean equals(byte[] a, byte[] b) {
+		return a.length == b.length && equals(a, 0, b, 0, a.length);
+	}
+
 	public static int firstNonEqualByte(byte[] a, byte[] b) {
 		return firstNonEqualByte(a, 0, b, 0, Math.min(a.length, b.length));
 	}
@@ -71,9 +78,17 @@ public class Utils {
 	static void print(String str) {
 		System.out.println(str);
 	}
-	
-	public static boolean isValidASCII(byte b){
-		return (b >= 20 && b <= 126) || b == '\n';  
+
+	public static boolean isValidASCII(byte b) {
+		return (b >= 20 && b <= 126) || b == '\n';
+	}
+
+	public static int[] bytesToInts(byte[] bytes) {
+
+		IntBuffer intBuf = ByteBuffer.wrap(bytes).asIntBuffer();
+		int[] ints = new int[intBuf.remaining()];
+		intBuf.get(ints);
+		return ints;
 	}
 
 }
