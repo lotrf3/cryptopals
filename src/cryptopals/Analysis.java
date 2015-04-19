@@ -12,27 +12,29 @@ import javax.xml.bind.DatatypeConverter;
 
 import cryptopals.Challenges.C17Server;
 import cryptopals.Challenges.C25Server;
+import cryptopals.Challenges.C29Server;
 
 public class Analysis {
 	public static Map<Character, Double> freq = frequencyEnglish();
 	private static SecureRandom random = new SecureRandom();
 	private static String marker64 = "ABCDEFGHIJKLMNOPQRSTUVWXWZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-	public static byte[] recoverCBCKeyIsIV(WebServer s, byte[] ciphertxt) throws Exception {
+	public static byte[] recoverCBCKeyIsIV(WebServer s, byte[] ciphertxt)
+			throws Exception {
 		int blockSize = 16;
-		if(ciphertxt.length < blockSize*3)
+		if (ciphertxt.length < blockSize * 3)
 			throw new Exception("Need 3 blocks of ciphertxt");
 		byte[] inj = new byte[ciphertxt.length];
 		System.arraycopy(ciphertxt, 0, inj, 0, blockSize);
-		System.arraycopy(ciphertxt, 0, inj, blockSize*2, blockSize);
-		try{
+		System.arraycopy(ciphertxt, 0, inj, blockSize * 2, blockSize);
+		try {
 			s.decrypt(inj);
-		
-		}
-		catch(IllegalArgumentException iaex){
+
+		} catch (IllegalArgumentException iaex) {
 			String msg = iaex.getMessage();
 			byte[] plaintxt = msg.split(":")[1].getBytes();
-			byte[] key = Encryption.repeatingXOR(plaintxt, 0, blockSize, plaintxt, blockSize*2, blockSize, blockSize);
+			byte[] key = Encryption.repeatingXOR(plaintxt, 0, blockSize,
+					plaintxt, blockSize * 2, blockSize, blockSize);
 			return key;
 		}
 		return null;
@@ -534,4 +536,40 @@ public class Analysis {
 			}
 		}
 	}
+
+	public static AuthenticatedMessage forgeSHA1MAC(C29Server s, byte[] mac,
+			byte[] msg, byte[] payload) {
+		SHA1 sha1 = new SHA1();
+		AuthenticatedMessage forgery = new AuthenticatedMessage();
+		int[] abcde = Utils.bytesToInts(mac);
+
+		byte[] padded = Arrays.copyOf(payload, payload.length + 64
+				- ((payload.length + 8) % 64) + 8);
+		padded[payload.length] = (byte) 0x80;
+		for(int keysize = 0; keysize < 1000; keysize++){
+			
+			long injectionPadding = 64 - ((keysize + msg.length + 8) % 64) + 8;
+			long payloadMessageLength = (keysize + msg.length + injectionPadding + payload.length) * 8;
+			for (int i = 0; i < 8; i++)
+				padded[padded.length - 8 + i] = (byte) (payloadMessageLength >>> (8 - i - 1 << 3));
+	
+			byte[] injection = Arrays.copyOf(msg, msg.length
+					+ (int) injectionPadding + payload.length);
+			injection[msg.length] = (byte) 0x80;
+			byte[] msgLengthBytes = Utils.longToBytes((keysize+msg.length)*8);
+			System.arraycopy(msgLengthBytes, 0, injection, injection.length
+					- payload.length - 8, 8);
+	
+			System.arraycopy(payload, 0, injection, injection.length
+					- payload.length, payload.length);
+			int[] blcks = Utils.bytesToInts(padded);
+			forgery.mac = sha1.hash(blcks, abcde[0], abcde[1], abcde[2], abcde[3],
+					abcde[4]);
+			forgery.msg = injection;
+			if(s.verify(forgery.msg, forgery.mac))
+				return forgery;
+		}
+		return forgery;
+	}
+
 }

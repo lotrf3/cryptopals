@@ -13,6 +13,13 @@ public class Utils {
 		}
 	}
 
+	public static byte[] concat(byte[]... a) {
+		byte[] temp = a[0];
+		for (int i = 1; i < a.length; i++)
+			temp = concat(temp, a[i]);
+		return temp;
+	}
+
 	public static byte[] concat(byte[] a, byte[] b) {
 		return concat(a, 0, a.length, b, 0, b.length);
 	}
@@ -89,6 +96,14 @@ public class Utils {
 		int[] ints = new int[intBuf.remaining()];
 		intBuf.get(ints);
 		return ints;
+	}
+
+	public static byte[] longToBytes(long l) {
+		byte[] b = new byte[8];
+		for (int i = 0; i < 8; ++i) {
+			b[i] = (byte) (l >> (8 - i - 1 << 3));
+		}
+		return b;
 	}
 
 }

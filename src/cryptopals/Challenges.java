@@ -333,15 +333,65 @@ public class Challenges {
 
 	}
 
+	class C29Server implements WebServer {
+
+		SHA1 sha1 = new SHA1();
+		byte[] randomKey = generateKey(random.nextInt(100)+5);
+		
+		public byte[] decrypt(byte[] data){
+			return null;
+		}
+
+		@Override
+		public byte[] encrypt(byte[] data) {
+			return sha1.hash(Utils.concat(randomKey, data));
+		}
+
+		public boolean verify(byte[] data, byte[] mac) {
+			return Utils.equals(encrypt(data), mac);
+		}
+
+	}
+
 	static Challenges instance = new Challenges();
 
 	static SecureRandom random = new SecureRandom();
 
-	static byte[] randomIV = new byte[] { 4, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-			12, 13, 14, 15, 16 };
+	static byte[] randomIV = new byte[] {
+			4,
+			2,
+			3,
+			4,
+			5,
+			6,
+			7,
+			8,
+			9,
+			10,
+			11,
+			12,
+			13,
+			14,
+			15,
+			16 };
 
-	private static byte[] randomKey = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9,
-			10, 11, 12, 13, 14, 15, 16 };
+	private static byte[] randomKey = new byte[] {
+			1,
+			2,
+			3,
+			4,
+			5,
+			6,
+			7,
+			8,
+			9,
+			10,
+			11,
+			12,
+			13,
+			14,
+			15,
+			16 };
 
 	public static void attackECBProfile() throws Exception {
 
@@ -701,6 +751,18 @@ public class Challenges {
 		print(sha1.hash(Utils.concat(randomKey, "tes1".getBytes())));
 	}
 
+	public void C29() throws Exception {
+		SHA1 sha1 = new SHA1();
+		byte[] msg = "comment1=cooking%20MCs;userdata=foo;comment2=%20like%20a%20pound%20of%20bacon".getBytes();
+		byte[] payload = ";admin=true".getBytes();
+		//print(sha1.hash(Utils.concat(randomKey, msg, payload)));
+		C29Server s = new C29Server();
+		byte[] mac = s.encrypt(msg);
+		AuthenticatedMessage inj = Analysis.forgeSHA1MAC(s, mac, msg, payload);
+		print(inj.msg);
+		System.out.println(s.verify(inj.msg, inj.mac));
+	}
+
 	public static byte[] createEncryptedProfile(String email) throws Exception {
 		return encryptECB(printKeyValueSet(profileFor(email)).getBytes(),
 				randomKey);
@@ -720,7 +782,7 @@ public class Challenges {
 	}
 
 	public static void main(String[] args) throws Exception {
-		instance.C28();
+		instance.C29();
 	}
 
 	public static Map<String, String> parseKeyValueSet(String str) {

@@ -1,33 +1,15 @@
 package cryptopals;
 
-import java.security.MessageDigest;
 import java.util.Arrays;
 
 public class SHA1 {
-	MessageDigest sha1;
 
 	public SHA1() {
-		try {
-
-			sha1 = MessageDigest.getInstance("SHA-1");
-		} catch (Exception ex) {
-
-		}
 	}
 
-	public byte[] hash(byte[] msg) {
-		long ml = msg.length * 8;
-
-		byte[] padded = Arrays.copyOf(msg, msg.length + 64
-				- ((msg.length + 8) % 64) + 8);
-		padded[msg.length] = (byte) 0x80;
-		for (int i = 0; i < 8; i++)
-			padded[padded.length - 8 + i] = (byte) (ml >>> (8 - i - 1 << 3));// ???
-
-		int h0 = 0x67452301, h1 = 0xEFCDAB89, h2 = 0x98BADCFE, h3 = 0x10325476, h4 = 0xC3D2E1F0;
-		int[] ints = Utils.bytesToInts(padded);
+	public byte[] hash(int[] blks, int h0, int h1, int h2, int h3, int h4) {
 		int[] w = new int[80];
-		for (int i = 0; i < ints.length; i += 16) {
+		for (int i = 0; i < blks.length; i += 16) {
 			int a = h0;
 			int b = h1;
 			int c = h2;
@@ -37,7 +19,7 @@ public class SHA1 {
 			int f, k;
 			for (int j = 0; j < 80; j++) {
 				if (j < 16)
-					w[j] = ints[i + j];
+					w[j] = blks[i + j];
 				else
 					w[j] = rotate(w[j - 3] ^ w[j - 8] ^ w[j - 14] ^ w[j - 16],
 							1);
@@ -92,6 +74,23 @@ public class SHA1 {
 				(byte) (h4 >>> 16),
 				(byte) (h4 >>> 8),
 				(byte) (h4 >>> 0) };
+
+		
+		return res;
+	}
+
+	public byte[] hash(byte[] msg) {
+		long ml = msg.length * 8;
+
+		int padding = 64 - ((msg.length + 8) % 64) + 8;
+		byte[] padded = Arrays.copyOf(msg, msg.length + padding);
+		padded[msg.length] = (byte) 0x80;
+		for (int i = 0; i < 8; i++)
+			padded[padded.length - 8 + i] = (byte) (ml >>> (8 - i - 1 << 3));// ???
+
+		int h0 = 0x67452301, h1 = 0xEFCDAB89, h2 = 0x98BADCFE, h3 = 0x10325476, h4 = 0xC3D2E1F0;
+		int[] ints = Utils.bytesToInts(padded);
+		byte[] res =  hash(ints, h0, h1, h2, h3, h4);
 
 		return res;
 	}
