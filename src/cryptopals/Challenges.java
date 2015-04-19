@@ -752,10 +752,8 @@ public class Challenges {
 	}
 
 	public void C29() throws Exception {
-		SHA1 sha1 = new SHA1();
 		byte[] msg = "comment1=cooking%20MCs;userdata=foo;comment2=%20like%20a%20pound%20of%20bacon".getBytes();
 		byte[] payload = ";admin=true".getBytes();
-		//print(sha1.hash(Utils.concat(randomKey, msg, payload)));
 		C29Server s = new C29Server();
 		byte[] mac = s.encrypt(msg);
 		AuthenticatedMessage inj = Analysis.forgeSHA1MAC(s, mac, msg, payload);
