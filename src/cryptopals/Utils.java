@@ -1,11 +1,12 @@
 package cryptopals;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 
 public class Utils {
 
-	public void swapByteOrder(byte[] a) {
+	public static void swapByteOrder(byte[] a) {
 		for (int i = 0; i < a.length / 2; i++) {
 			byte tmp = a[i];
 			a[i] = a[a.length - 1 - i];
@@ -91,8 +92,12 @@ public class Utils {
 	}
 
 	public static int[] bytesToInts(byte[] bytes) {
+		return bytesToInts(bytes, ByteOrder.BIG_ENDIAN);
+	}
 
-		IntBuffer intBuf = ByteBuffer.wrap(bytes).asIntBuffer();
+	public static int[] bytesToInts(byte[] bytes, ByteOrder order) {
+
+		IntBuffer intBuf = ByteBuffer.wrap(bytes).order(order).asIntBuffer();
 		int[] ints = new int[intBuf.remaining()];
 		intBuf.get(ints);
 		return ints;

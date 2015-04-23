@@ -336,15 +336,35 @@ public class Challenges {
 	class C29Server implements WebServer {
 
 		SHA1 sha1 = new SHA1();
-		byte[] randomKey = generateKey(random.nextInt(100)+5);
-		
-		public byte[] decrypt(byte[] data){
+		byte[] randomKey = generateKey(random.nextInt(100) + 5);
+
+		public byte[] decrypt(byte[] data) {
 			return null;
 		}
 
 		@Override
 		public byte[] encrypt(byte[] data) {
 			return sha1.hash(Utils.concat(randomKey, data));
+		}
+
+		public boolean verify(byte[] data, byte[] mac) {
+			return Utils.equals(encrypt(data), mac);
+		}
+
+	}
+
+	class C30Server implements WebServer {
+
+		MD4 md4 = new MD4();
+		//byte[] randomKey = generateKey(random.nextInt(100) + 5);
+
+		public byte[] decrypt(byte[] data) {
+			return null;
+		}
+
+		@Override
+		public byte[] encrypt(byte[] data) {
+			return md4.digest(Utils.concat(randomKey, data));
 		}
 
 		public boolean verify(byte[] data, byte[] mac) {
@@ -752,13 +772,28 @@ public class Challenges {
 	}
 
 	public void C29() throws Exception {
-		byte[] msg = "comment1=cooking%20MCs;userdata=foo;comment2=%20like%20a%20pound%20of%20bacon".getBytes();
+		byte[] msg = "comment1=cooking%20MCs;userdata=foo;comment2=%20like%20a%20pound%20of%20bacon"
+				.getBytes();
 		byte[] payload = ";admin=true".getBytes();
 		C29Server s = new C29Server();
 		byte[] mac = s.encrypt(msg);
 		AuthenticatedMessage inj = Analysis.forgeSHA1MAC(s, mac, msg, payload);
 		print(inj.msg);
 		System.out.println(s.verify(inj.msg, inj.mac));
+	}
+
+	public void C30() {
+
+		byte[] msg = "comment1=cooking%20MCs;userdata=foo;comment2=%20like%20a%20pound%20of%20bacon"
+				.getBytes();
+		
+		byte[] payload = ";admin=true".getBytes();
+		C30Server s = new C30Server();
+		byte[] mac = s.encrypt(msg);
+		AuthenticatedMessage inj = Analysis.forgeMD4MAC(s, mac, msg, payload);
+		print(inj.msg);
+		System.out.println(s.verify(inj.msg, inj.mac));
+
 	}
 
 	public static byte[] createEncryptedProfile(String email) throws Exception {
@@ -780,7 +815,7 @@ public class Challenges {
 	}
 
 	public static void main(String[] args) throws Exception {
-		instance.C29();
+		instance.C30();
 	}
 
 	public static Map<String, String> parseKeyValueSet(String str) {

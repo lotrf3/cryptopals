@@ -1,6 +1,7 @@
 package cryptopals;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.security.SecureRandom;
 import java.util.Arrays;
@@ -13,6 +14,7 @@ import javax.xml.bind.DatatypeConverter;
 import cryptopals.Challenges.C17Server;
 import cryptopals.Challenges.C25Server;
 import cryptopals.Challenges.C29Server;
+import cryptopals.Challenges.C30Server;
 
 public class Analysis {
 	public static Map<Character, Double> freq = frequencyEnglish();
@@ -546,30 +548,76 @@ public class Analysis {
 		byte[] padded = Arrays.copyOf(payload, payload.length + 64
 				- ((payload.length + 8) % 64) + 8);
 		padded[payload.length] = (byte) 0x80;
-		for(int keysize = 0; keysize < 1000; keysize++){
-			
+		for (int keysize = 0; keysize < 1000; keysize++) {
+
 			long injectionPadding = 64 - ((keysize + msg.length + 8) % 64) + 8;
-			long payloadMessageLength = (keysize + msg.length + injectionPadding + payload.length) * 8;
+			long payloadMessageLength = (keysize + msg.length
+					+ injectionPadding + payload.length) * 8;
 			for (int i = 0; i < 8; i++)
 				padded[padded.length - 8 + i] = (byte) (payloadMessageLength >>> (8 - i - 1 << 3));
-	
+
 			byte[] injection = Arrays.copyOf(msg, msg.length
 					+ (int) injectionPadding + payload.length);
 			injection[msg.length] = (byte) 0x80;
-			byte[] msgLengthBytes = Utils.longToBytes((keysize+msg.length)*8);
+			byte[] msgLengthBytes = Utils
+					.longToBytes((keysize + msg.length) * 8);
 			System.arraycopy(msgLengthBytes, 0, injection, injection.length
 					- payload.length - 8, 8);
-	
+
 			System.arraycopy(payload, 0, injection, injection.length
 					- payload.length, payload.length);
 			int[] blcks = Utils.bytesToInts(padded);
-			forgery.mac = sha1.hash(blcks, abcde[0], abcde[1], abcde[2], abcde[3],
-					abcde[4]);
+			forgery.mac = sha1.hash(blcks, abcde[0], abcde[1], abcde[2],
+					abcde[3], abcde[4]);
 			forgery.msg = injection;
-			if(s.verify(forgery.msg, forgery.mac))
+			if (s.verify(forgery.msg, forgery.mac))
 				return forgery;
 		}
-		return forgery;
+		return null;
+	}
+
+	public static AuthenticatedMessage forgeMD4MAC(C30Server s, byte[] mac,
+			byte[] msg, byte[] payload) {
+		MD4 md4 = new MD4();
+		AuthenticatedMessage forgery = new AuthenticatedMessage();
+		int[] abcd = Utils.bytesToInts(mac, ByteOrder.LITTLE_ENDIAN);
+
+		byte[] padded = Arrays.copyOf(payload, payload.length + 64
+				- ((payload.length + 8) % 64) + 8);
+		padded[payload.length] = (byte) 0x80;
+		for (int keysize = 16; keysize < 17; keysize++) {
+
+			long injectionPadding = 64 - ((keysize + msg.length + 8) % 64) + 8;
+			long payloadMessageLength = (keysize + msg.length
+					+ injectionPadding + payload.length) * 8;
+			byte[] payloadMsgLengthBytes = Utils
+					.longToBytes(payloadMessageLength);
+			Utils.swapByteOrder(payloadMsgLengthBytes);
+			System.arraycopy(payloadMsgLengthBytes, 0, padded,
+					padded.length - 8, 8);
+
+			byte[] injection = Arrays.copyOf(msg, msg.length
+					+ (int) injectionPadding + payload.length);
+			injection[msg.length] = (byte) 0x80;
+			byte[] msgLengthBytes = Utils
+					.longToBytes((keysize + msg.length) * 8);
+			Utils.swapByteOrder(msgLengthBytes);
+			System.arraycopy(msgLengthBytes, 0, injection, injection.length
+					- payload.length - 8, 8);
+
+			System.arraycopy(payload, 0, injection, injection.length
+					- payload.length, payload.length);
+			md4.a = abcd[0];
+			md4.b = abcd[1];
+			md4.c = abcd[2];
+			md4.d = abcd[3];
+			md4.msgLength = keysize + msg.length + injectionPadding;
+			forgery.mac = md4.digest(payload);
+			forgery.msg = injection;
+			if (s.verify(forgery.msg, forgery.mac))
+				return forgery;
+		}
+		return null;
 	}
 
 }
