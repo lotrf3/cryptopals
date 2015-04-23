@@ -15,6 +15,7 @@ import cryptopals.Challenges.C17Server;
 import cryptopals.Challenges.C25Server;
 import cryptopals.Challenges.C29Server;
 import cryptopals.Challenges.C30Server;
+import cryptopals.Challenges.C31Server;
 
 public class Analysis {
 	public static Map<Character, Double> freq = frequencyEnglish();
@@ -618,6 +619,32 @@ public class Analysis {
 				return forgery;
 		}
 		return null;
+	}
+
+	public static byte[] attackHMACTimingLeak(C31Server s, byte[] msg, int macLength)
+			throws Exception {
+		byte[] mac = new byte[macLength];
+		for (int i = 0; i < macLength; i++) {
+			long max = Long.MIN_VALUE;
+			byte minByte = 0;
+			for (int j = Byte.MIN_VALUE; j <= Byte.MAX_VALUE; j++) {
+				mac[i] = (byte) j;
+				long t1 = System.nanoTime();
+				s.verify(msg, mac);
+				long t2 = System.nanoTime();
+				long diff = t2 - t1;
+				if (diff > max) {
+					max = diff;
+					minByte = (byte) j;
+				}
+			}
+			mac[i] = minByte;
+		}
+		if (s.verify(msg, mac))
+			return mac;
+		else
+			return null;
+
 	}
 
 }

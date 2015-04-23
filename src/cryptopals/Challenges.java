@@ -356,7 +356,8 @@ public class Challenges {
 	class C30Server implements WebServer {
 
 		MD4 md4 = new MD4();
-		//byte[] randomKey = generateKey(random.nextInt(100) + 5);
+
+		// byte[] randomKey = generateKey(random.nextInt(100) + 5);
 
 		public byte[] decrypt(byte[] data) {
 			return null;
@@ -369,6 +370,38 @@ public class Challenges {
 
 		public boolean verify(byte[] data, byte[] mac) {
 			return Utils.equals(encrypt(data), mac);
+		}
+
+	}
+
+	class C31Server implements WebServer {
+
+		SHA1 sha1 = new SHA1();
+		HMAC hmac = new HMAC(sha1);
+
+		// byte[] randomKey = generateKey(random.nextInt(100) + 5);
+
+		public byte[] decrypt(byte[] data) {
+			return null;
+		}
+
+		@Override
+		public byte[] encrypt(byte[] data) {
+			return hmac.hmac(randomKey, data);
+		}
+
+		public boolean verify(byte[] data, byte[] mac) throws Exception {
+			byte[] macAuth = hmac.hmac(randomKey, data);
+			return insecureCompare(macAuth,mac);
+		}
+
+		private boolean insecureCompare(byte[] mac1, byte[] mac2) throws Exception {
+			for (int i = 0; i < mac1.length; i++) {
+				if (mac1[i] != mac2[i])
+					return false;
+				Thread.sleep(50);
+			}
+			return true;
 		}
 
 	}
@@ -786,13 +819,19 @@ public class Challenges {
 
 		byte[] msg = "comment1=cooking%20MCs;userdata=foo;comment2=%20like%20a%20pound%20of%20bacon"
 				.getBytes();
-		
+
 		byte[] payload = ";admin=true".getBytes();
 		C30Server s = new C30Server();
 		byte[] mac = s.encrypt(msg);
 		AuthenticatedMessage inj = Analysis.forgeMD4MAC(s, mac, msg, payload);
 		print(inj.msg);
 		System.out.println(s.verify(inj.msg, inj.mac));
+
+	}
+
+	public void C31() throws Exception {
+		C31Server s = new C31Server();
+		print(Analysis.attackHMACTimingLeak(s, "hello".getBytes(),20));
 
 	}
 
@@ -815,7 +854,7 @@ public class Challenges {
 	}
 
 	public static void main(String[] args) throws Exception {
-		instance.C30();
+		instance.C31();
 	}
 
 	public static Map<String, String> parseKeyValueSet(String str) {
