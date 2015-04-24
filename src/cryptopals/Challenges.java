@@ -399,7 +399,7 @@ public class Challenges {
 			for (int i = 0; i < mac1.length; i++) {
 				if (mac1[i] != mac2[i])
 					return false;
-				Thread.sleep(50);
+				Thread.sleep(5);
 			}
 			return true;
 		}

@@ -626,19 +626,28 @@ public class Analysis {
 		byte[] mac = new byte[macLength];
 		for (int i = 0; i < macLength; i++) {
 			long max = Long.MIN_VALUE;
-			byte minByte = 0;
-			for (int j = Byte.MIN_VALUE; j <= Byte.MAX_VALUE; j++) {
-				mac[i] = (byte) j;
-				long t1 = System.nanoTime();
-				s.verify(msg, mac);
-				long t2 = System.nanoTime();
-				long diff = t2 - t1;
-				if (diff > max) {
-					max = diff;
-					minByte = (byte) j;
+			byte maxByte = 0;
+			long[] diffs = new long[256];
+			for(long j=1;j<20;j++){
+				for (int k = Byte.MIN_VALUE; k <= Byte.MAX_VALUE; k++) {
+					mac[i] = (byte) k;
+					long t1 = System.nanoTime();
+					s.verify(msg, mac);
+					long t2 = System.nanoTime();
+					long diff = t2 - t1;
+					int index = k-Byte.MIN_VALUE;
+					diffs[index]+=diff;
+					if(diffs[index] > max){
+						max = diffs[index];
+						maxByte = (byte) k;
+					}
 				}
+				//if(j > 3 && (max - max2)/Math.sqrt(j) > 10000)
+				//	break;
 			}
-			mac[i] = minByte;
+			
+			
+			mac[i] = maxByte;
 		}
 		if (s.verify(msg, mac))
 			return mac;
@@ -646,5 +655,4 @@ public class Analysis {
 			return null;
 
 	}
-
 }
