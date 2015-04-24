@@ -586,7 +586,7 @@ public class Analysis {
 		byte[] padded = Arrays.copyOf(payload, payload.length + 64
 				- ((payload.length + 8) % 64) + 8);
 		padded[payload.length] = (byte) 0x80;
-		for (int keysize = 16; keysize < 17; keysize++) {
+		for (int keysize = 0; keysize < 1000; keysize++) {
 
 			long injectionPadding = 64 - ((keysize + msg.length + 8) % 64) + 8;
 			long payloadMessageLength = (keysize + msg.length

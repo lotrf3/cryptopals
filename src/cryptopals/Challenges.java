@@ -357,7 +357,7 @@ public class Challenges {
 
 		MD4 md4 = new MD4();
 
-		// byte[] randomKey = generateKey(random.nextInt(100) + 5);
+		byte[] randomKey = generateKey(random.nextInt(100) + 5);
 
 		public byte[] decrypt(byte[] data) {
 			return null;
@@ -392,10 +392,11 @@ public class Challenges {
 
 		public boolean verify(byte[] data, byte[] mac) throws Exception {
 			byte[] macAuth = hmac.hmac(randomKey, data);
-			return insecureCompare(macAuth,mac);
+			return insecureCompare(macAuth, mac);
 		}
 
-		private boolean insecureCompare(byte[] mac1, byte[] mac2) throws Exception {
+		private boolean insecureCompare(byte[] mac1, byte[] mac2)
+				throws Exception {
 			for (int i = 0; i < mac1.length; i++) {
 				if (mac1[i] != mac2[i])
 					return false;
@@ -831,7 +832,7 @@ public class Challenges {
 
 	public void C31() throws Exception {
 		C31Server s = new C31Server();
-		print(Analysis.attackHMACTimingLeak(s, "hello".getBytes(),20));
+		print(Analysis.attackHMACTimingLeak(s, "hello".getBytes(), 20));
 
 	}
 
@@ -854,7 +855,7 @@ public class Challenges {
 	}
 
 	public static void main(String[] args) throws Exception {
-		instance.C31();
+		instance.C30();
 	}
 
 	public static Map<String, String> parseKeyValueSet(String str) {
