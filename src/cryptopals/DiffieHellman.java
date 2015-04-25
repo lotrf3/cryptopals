@@ -20,13 +20,29 @@ public class DiffieHellman {
 						+ "bb9ed529077096966d670c354e4abc9804f1746c08ca237327fff"
 						+ "fffffffffffff", 16);
 		g = BigInteger.valueOf(2);
-		a = new BigInteger(8, random);
-		A = g.modPow(a, p);
-		b = new BigInteger(8, random);
-		B = g.modPow(b, p);
-		s = B.modPow(a, p);
-		BigInteger s2 = A.modPow(b, p);
-		assert s.equals(s2);
 	}
-	
+
+	public BigInteger getA() {
+		if (a == null) {
+			a = new BigInteger(8, random);
+			A = g.modPow(a, p);
+		}
+		return A;
+	}
+
+	public BigInteger getB() {
+		if (b == null) {
+			b = new BigInteger(8, random);
+			B = g.modPow(b, p);
+		}
+		return B;
+	}
+
+	public byte[] getSessionKey() {
+		if (a != null)
+			return B.modPow(a, p).toByteArray();
+		else
+			return A.modPow(b, p).toByteArray();
+	}
+
 }

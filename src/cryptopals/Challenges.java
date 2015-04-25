@@ -836,10 +836,31 @@ public class Challenges {
 
 	}
 
-	public void C32()  {
+	public void C32() throws Exception {
+		C31Server s = new C31Server();
+		print(Analysis.attackHMACTimingLeak(s, "hello".getBytes(), 20));
+
+	}
+
+	public void C33() {
 		DiffieHellman dh = new DiffieHellman(random);
 		SHA1 sha1 = new SHA1();
 		print(sha1.hash(dh.s.toByteArray()));
+
+	}
+
+	public void C34() throws Exception {
+		// Valid key exchange
+		DiffieHellman alice = new DiffieHellman(random);
+		DiffieHellman bob = new DiffieHellman(random);
+		DiffieHellmanExchange ex = new DiffieHellmanExchange();
+		ex.run(alice, bob, randomIV);
+
+		//MitM
+		alice = new DiffieHellman(random);
+		bob = new DiffieHellman(random);
+		ex = new MITMDiffieHellmanExchangeP();
+		ex.run(alice, bob, randomIV);
 
 	}
 
@@ -862,7 +883,7 @@ public class Challenges {
 	}
 
 	public static void main(String[] args) throws Exception {
-		instance.C32();
+		instance.C34();
 	}
 
 	public static Map<String, String> parseKeyValueSet(String str) {
