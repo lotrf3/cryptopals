@@ -836,6 +836,13 @@ public class Challenges {
 
 	}
 
+	public void C32()  {
+		DiffieHellman dh = new DiffieHellman(random);
+		SHA1 sha1 = new SHA1();
+		print(sha1.hash(dh.s.toByteArray()));
+
+	}
+
 	public static byte[] createEncryptedProfile(String email) throws Exception {
 		return encryptECB(printKeyValueSet(profileFor(email)).getBytes(),
 				randomKey);
@@ -855,7 +862,7 @@ public class Challenges {
 	}
 
 	public static void main(String[] args) throws Exception {
-		instance.C30();
+		instance.C32();
 	}
 
 	public static Map<String, String> parseKeyValueSet(String str) {
