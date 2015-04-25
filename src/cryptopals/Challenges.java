@@ -7,6 +7,7 @@ import static cryptopals.Utils.print;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -863,7 +864,29 @@ public class Challenges {
 		ex.run(alice, bob, randomIV);
 
 	}
+	public void C35() throws Exception {
+		// MITM p==1
+		DiffieHellman alice = new DiffieHellman(random);
+		alice.g = BigInteger.ONE;
+		DiffieHellman bob = new DiffieHellman(random);
+		DiffieHellmanExchange ex = new MITMDiffieHellmanExchangeG1();
+		ex.run(alice, bob, randomIV);
 
+
+		alice = new DiffieHellman(random);
+		alice.g = alice.p;
+		bob = new DiffieHellman(random);
+		ex = new MITMDiffieHellmanExchangeGP();
+		ex.run(alice, bob, randomIV);
+
+		alice = new DiffieHellman(random);
+		alice.g = alice.p.subtract(BigInteger.ONE);
+		bob = new DiffieHellman(random);
+		ex = new MITMDiffieHellmanExchangeGP1();
+		ex.run(alice, bob, randomIV);
+
+
+	}
 	public static byte[] createEncryptedProfile(String email) throws Exception {
 		return encryptECB(printKeyValueSet(profileFor(email)).getBytes(),
 				randomKey);
@@ -883,7 +906,7 @@ public class Challenges {
 	}
 
 	public static void main(String[] args) throws Exception {
-		instance.C34();
+		instance.C35();
 	}
 
 	public static Map<String, String> parseKeyValueSet(String str) {
