@@ -857,13 +857,14 @@ public class Challenges {
 		DiffieHellmanExchange ex = new DiffieHellmanExchange();
 		ex.run(alice, bob, randomIV);
 
-		//MitM
+		// MitM
 		alice = new DiffieHellman(random);
 		bob = new DiffieHellman(random);
 		ex = new MITMDiffieHellmanExchangeP();
 		ex.run(alice, bob, randomIV);
 
 	}
+
 	public void C35() throws Exception {
 		// MITM p==1
 		DiffieHellman alice = new DiffieHellman(random);
@@ -871,7 +872,6 @@ public class Challenges {
 		DiffieHellman bob = new DiffieHellman(random);
 		DiffieHellmanExchange ex = new MITMDiffieHellmanExchangeG1();
 		ex.run(alice, bob, randomIV);
-
 
 		alice = new DiffieHellman(random);
 		alice.g = alice.p;
@@ -885,8 +885,22 @@ public class Challenges {
 		ex = new MITMDiffieHellmanExchangeGP1();
 		ex.run(alice, bob, randomIV);
 
-
 	}
+
+	public void C36() {
+		
+		BigInteger N = Utils.NIST_PRIME;
+		BigInteger g = BigInteger.valueOf(2);
+		BigInteger k = BigInteger.valueOf(3);
+		String username = "foo@bar.com";
+		String password = "swordfish";
+		
+		SRPServer bob = new SRPServer();
+		bob.createUser(N,g,k,username,password);
+		SRPClient alice = new SRPClient(N, g, k, username, password);
+		assert(alice.authenticate(bob));
+	}
+
 	public static byte[] createEncryptedProfile(String email) throws Exception {
 		return encryptECB(printKeyValueSet(profileFor(email)).getBytes(),
 				randomKey);
@@ -906,7 +920,7 @@ public class Challenges {
 	}
 
 	public static void main(String[] args) throws Exception {
-		instance.C35();
+		instance.C36();
 	}
 
 	public static Map<String, String> parseKeyValueSet(String str) {
