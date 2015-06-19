@@ -888,17 +888,31 @@ public class Challenges {
 	}
 
 	public void C36() {
-		
+
 		BigInteger N = Utils.NIST_PRIME;
 		BigInteger g = BigInteger.valueOf(2);
 		BigInteger k = BigInteger.valueOf(3);
 		String username = "foo@bar.com";
 		String password = "swordfish";
-		
+
 		SRPServer bob = new SRPServer();
-		bob.createUser(N,g,k,username,password);
+		bob.createUser(N, g, k, username, password);
 		SRPClient alice = new SRPClient(N, g, k, username, password);
-		assert(alice.authenticate(bob));
+		assert (alice.authenticate(bob));
+	}
+
+	public void C37() {
+
+		BigInteger N = Utils.NIST_PRIME;
+		BigInteger g = BigInteger.valueOf(2);
+		BigInteger k = BigInteger.valueOf(3);
+		String username = "alice@example.com";
+		String password = "swordfish";
+
+		SRPServer bob = new SRPServer();
+		bob.createUser(N, g, k, username, password);
+		SRPClient0Key mallory = new SRPClient0Key(N, g, k, username);
+		assert (mallory.authenticate(bob));
 	}
 
 	public static byte[] createEncryptedProfile(String email) throws Exception {
@@ -920,7 +934,7 @@ public class Challenges {
 	}
 
 	public static void main(String[] args) throws Exception {
-		instance.C36();
+		instance.C37();
 	}
 
 	public static Map<String, String> parseKeyValueSet(String str) {
