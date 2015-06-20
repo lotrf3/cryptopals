@@ -2,22 +2,22 @@ package cryptopals;
 
 import java.math.BigInteger;
 
-public class SRPClient0Key extends SRPClient {
+public class SRPClientN2Key extends SRPClient {
 
-	public SRPClient0Key(BigInteger N, BigInteger g, BigInteger k,
+	public SRPClientN2Key(BigInteger N, BigInteger g, BigInteger k,
 			String username) {
 		super(N, g, k, username, "");
 	}
-	
+
 	@Override
 	public boolean authenticate(SRPServer server) {
 		dh = new DiffieHellman(random);
 		dh.g = g;
 		dh.p = N;
-		dh.A = dh.a = BigInteger.ZERO;
+		dh.A = dh.a = N.shiftLeft(1);
 		return server.authenticate(this, username, dh.A);
 	}
-	
+
 	@Override
 	public boolean handshake(SRPServer server, byte[] salt,
 			BigInteger serverPublicKey) {

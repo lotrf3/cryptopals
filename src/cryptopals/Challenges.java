@@ -911,8 +911,18 @@ public class Challenges {
 
 		SRPServer bob = new SRPServer();
 		bob.createUser(N, g, k, username, password);
-		SRPClient0Key mallory = new SRPClient0Key(N, g, k, username);
+		SRPClient mallory = new SRPClient0Key(N, g, k, username);
 		assert (mallory.authenticate(bob));
+
+		mallory = new SRPClientNKey(N, g, k, username);
+		assert (mallory.authenticate(bob));
+		
+		mallory = new SRPClientN2Key(N, g, k, username);
+		assert (mallory.authenticate(bob));
+		
+		
+		
+		
 	}
 
 	public static byte[] createEncryptedProfile(String email) throws Exception {
