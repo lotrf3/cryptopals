@@ -916,13 +916,26 @@ public class Challenges {
 
 		mallory = new SRPClientNKey(N, g, k, username);
 		assert (mallory.authenticate(bob));
-		
+
 		mallory = new SRPClientN2Key(N, g, k, username);
 		assert (mallory.authenticate(bob));
-		
-		
-		
-		
+
+	}
+
+	public void C38() {
+
+		BigInteger N = Utils.NIST_PRIME;
+		BigInteger g = BigInteger.valueOf(2);
+		String username = "alice@example.com";
+		String password = "swordfish";
+
+		SRPServerSimple bob = new SRPServerSimple();
+		bob.createUser(N, g, username, password);
+		SRPClientSimple alice = new SRPClientSimple(N, g, username, password);
+		SRPSimpleMITM mallory = new SRPSimpleMITM(N, g, "john.txt");
+		assert (alice.authenticate(mallory.server));
+		assert (mallory.crackHash());
+		assert (mallory.client.authenticate(bob));
 	}
 
 	public static byte[] createEncryptedProfile(String email) throws Exception {
@@ -944,7 +957,7 @@ public class Challenges {
 	}
 
 	public static void main(String[] args) throws Exception {
-		instance.C37();
+		instance.C38();
 	}
 
 	public static Map<String, String> parseKeyValueSet(String str) {
